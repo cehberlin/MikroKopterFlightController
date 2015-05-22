@@ -1,0 +1,616 @@
+
+------- 
+V0.53   27.04.2007 H.Buss
+  - erste öffentliche Version
+
+V0.53b  29.04.2007 H.Buss
+  - der FAKTOR_I war versehentlich auf Null, dann liegt der MikroKopter nicht so hart in der Luft
+
+V0.53c  29.04.2007 H.Buss
+  - es gib ein Menü, in dem die Werte der Kanäle nach Nick, Roll, Gas,... sortiert sind. 
+    Die angezeigten Werte waren nicht die Werte der Funke
+
+V0.54  01.05.2007 H.Buss
+  - die Paramtersätze können jetzt vor dem Start ausgewählt werden
+    Dazu wird beim Kalibrieren der Messwerte (Gashebel oben links) der Nick-Rollhebel abgefragt:
+		2 3 4
+		1 x 5
+		- - -
+	Bedeutet: Nick-Rollhebel Links Mitte = Setting:1 Links Oben = Setting:2  usw.
+  - der Faktor_I für den Hauptregler ist hinzugekommen. Im Heading-Hold-Modus sollte er vergössert werden, was Stabilität bringt	
+
+V0.55  14.05.2007 H.Buss
+  - es können nun Servos an J3,J4,J5 mit den Kanälen 5-7 gesteuert werden
+
+V0.56  14.05.2007 H.Buss
+  - es gab Probleme mit Funken, die mehr als 8 Kanäle haben, wenn mehrere Kanäle dann auf Null waren
+  - Funken, die nicht bis +-120 aussteuern können, sollten jetzt auch gehen
+  
+V0.57  24.05.2007 H.Buss
+  - Der Höhenregler kann nun auch mittels Schalter bedient werden
+  - Bug im Gier-Algorithmus behoben; Schnelles Gieren fürhrte dazu, dass der MK zu weit gedreht hat
+  - Kompass-Einfluss dämpfen bei Neigung
+  - Man kann zwischen Kompass FIX (Richtung beim Kalibrieren) und Variabel (einstellbar per Gier) wählen
+  - Der Motortest vom Kopter-Tool geht jetzt
+  - Man kann den Parametersätzen einen Namen geben
+  - Das Kamerasetting ist unter Setting 2 defaultmässig integriert
+  
+V0.58  30.05.2007 H.Buss
+  - Der Höhenregler-Algorithmus wird nun umgangen, wenn der Höhenreglerschalter aus ist
+
+V0.60  17.08.2007 H.Buss
+  - "Schwindel-Bug" behoben
+  - Die Poti-Werte werden jetzt auf Unterlauf (<0) überprüft
+  - Poti4 zugefügt 
+  - Es werden jetzt 8 Kanäle ausgewertet
+  - Kamera-Servo (an J7) 
+  - Die Settings müssen überschrieben werden
+  
+V0.61 - V0.63   H.Buss  27.09.2007
+  - Poti 4 und Kanal 8 werden im Menü angezeigt
+  - ein paar Kleinigkeiten bei den DefaultKonstanten2 bereinigt  
+  - Analog.c: Aktuell_ax korrigiert
+  - auf 32 Debug-Kanäle erweitert
+  - Loopings sind jetzt möglich und einzeln im KopterTool freischaltbar
+  - leichte Anpassungen im Gier - Geschwindigkeit und Drift
+  - die Hardwareversion V1.1 wird erkannt und das Programm stellt sich auf die geänderte Gyroverstärkung und die geänderten Portpins ein
+  - die Software startet nach dem Einschalten schneller, weil der Luftdruckoffset schneller gefunden wird
+  - die PPM-Ausgänge liegen wieder an den Pins an
+  - Details an der Sensordatenverarbeitung -> es fliegt sich geringfügig anders
+  - der MK ist bei wenig Gas nicht mehr so giftig -> soll das Landen vereinfachen
+  - I2C-Bus läuft jetzt sicher nach einer Störung wieder an
+  - Sticksignale werden präziser ausgewertet 
+  - Stick-Kanäle werden ans Kopter-Tool übertragen
+  - Es muss die Version V1.47 des Kopter-Tool verwendet werden
+  - Die Settings werden auf Default zurückgesetzt
+  - am Piepen kann man die Fehlerart unterscheiden
+        1. einzelnes Piepen beim Einschalten und Kalibrieren
+        2. langsames Intervall mindestens 1 Sek -> Empfangsausfall
+        3. schnelleres Intervall mindestens 1 Sek -> Akku
+        4. sehr schnelles Intervall mindestens 1 Sek -> Kommunikation zu den Reglern gestört
+    
+V0.64 H.Buss  30.09.2007
+  - beim Gieren wurden die Achsen nicht hart genug geregelt
+  
+V0.65a H.Buss  15.10.2007
+  - Integral im Mischer wieder integriert
+  - Feinabstimmung im ACC/Gyro Abgleich -> 1/32 & 100
+  - ACC/Gyro Abgleich auch bei HH
+
+V0.66a H.Buss  3.11.2007
+  - Messwertverarbeitung aus dem Analog-Interrupt entfernt
+  - Analogmessung hängt jetzt am FC-Timing
+  - Looping-Stick-Hysterese eingebaut
+  - Looping-180°-Umschlag einstellbar
+  - Achsenkopplung: Gierbewegung verkoppelt Nick und Roll
+  - Lageregelung nach ACC-Sensor verbessert
+  - zusätzlicher I-Anteil in der Lageregelung verbessert die Neutrallage
+  - Gyrodriftkompensation  überarbeitet
+  - Bug in der Gier-Stick-Berechnung behoben
+  - Gyro-Messung auf 1kHz beschleunigt
+ 
+V0.67a H.Buss 16.11.2007
+  - der Hauptregler-I-Anteil wirkt jetzt nur noch auf den Winkel (ausser im HH-Mode)
+  - Gyro-Acc-Abgleich jetzt wieder in jedem Zyklus
+  - Feinabstimmung
+  - Beim HH-Modus gab es noch Bugs
+
+V0.67e H.Buss 29.11.2007
+  - Parameter: Dynamic Stability und Driftfaktor eingeführt
+  - Die Namen der Analogwerte werden jetzt zum Koptertool übertragen 
+  - Kompatibilität zum Koptertool erhöht
+
+V0.67f H.Buss 04.12.2007
+  - Das Integral des Hauptreglers wird jetzt linear entladen und nicht mehr proportional
+  - Schub für Gier wird jetzt auf den Gaswert begrenzt, dadurch steigt der MK nicht mehr beim Gieren. Gier ist allerdings nicht mehr so agressiv
+  - Die ACC-Nullwerte können jetzt dauerhaft im EEPROM gespeichert werden (Stick:Vollgas und Gier rechts)
+ 
+V0.68a I.Busker 28.12.2007
+ - SPI.c & SPI.h ins Projekt aufgenommen
+   SPI-Kommuikation kann in SPI.h aktiviert/deaktivert werden  
+
+V0.68c H.Buss 05.01.2008
+ - Stickauswertung verbessert -> träger und präziser
+ - Alle Settings angepasst
+
+V0.69e H.Buss 05.05.2008
+ - kleinere Bugs beseitigt
+ - Schneller Sinkflug jetzt möglich 
+ - Min- und Maxgas in den Settings geändert
+ - Lagewinkel wird jetzt in 0,1 Grad an Kompass und Navi gesendet
+ - Kalibrierung für MK3Mag -> Nick unten beim Kalibrieren 
+ - Kompassroutine um den Ersatzkompass (Gyro unterstützt Kompasswert) erweitert
+ 
+V0.69h H.Buss 21.05.2008
+ - STICK_GAIN = 4 eingeführt. Das erhöht die Auflösung der Sollwerte. Stick_P und Stick_I müssen nun um Faktor 4 erhöht werden
+ - SenderOkay auch an das Naviboard übertragen
+ - Bessere Parameter bei Senderausfall
+ 
+V0.69j H.Buss 30.05.2008
+ - Höhere Präzision der Achsenkopplung 
+
+V0.69k H.Buss 31.05.2008
+ - Bug in SPI.C behoben
+ - in 0.69h war ein Bug, der zu ungewollten Loopings führen konnte 
+
+V0.69L H.Buss 14.06.2008
+ - feinere Cam-Servo-Auflösung
+ 
+V0.70a H.Buss 01.07.2008
+ - Unterstützung der V1.3-Hardware mit automatischem Hardware-Gyro-Abgleich
+
+V0.70b H.Buss 14.07.2008
+ - flexible Einstellungsmöglichkeit von J16 und J17 (Transistorausgänge)
+ - eigene Parameter für GPS-Naviboard 
+ - eigener Parameter für ExternalControl (war vorher UserParameter1 bzw. 8)
+ - neue Parameter im EEPROM-Datensatz: J16Bitmask, J16Timing, ExternalControl, Navi...
+ - MikroKopterFlags eingeführt, damit das Navi den Status des MKs kennt
+ - KopterTool-Kompatibilität auf 8 erhöht
+ 
+V0.70c H.Buss 30.07.2008
+ - Parameter der Datenfusion leicht modifiziert
+ - EEPROM-Parameter für Looping-Umschlag angepasst (von 100 auf 85)
+ - MaxStick wird auf 100 begrenzt
+
+V0.70d H.Buss 02.08.2008
+ - Transistorausgänge: das oberste Bit der Blinkmaske (im KopterTool linkes Bit) gibt nun den Zustand des Ausgangs im Schalterbetrieb an
+ 
+0.71b: H.Buss 19.10.2008
+ Kommunikation zum Navi erweitert:
+ - Beeptime jetzt 32Bit
+ - Datenfusion und Driftkopensation wird durch NaviBoard unterstützt
+ 
+0.71c: H.Buss 20.10.2008
+ - LoopConfig heisst jetzt BitConfig 
+ - 3-Fach-Schalter für Höhensteuerung möglich -> kann man mit GPS-Schalter zusammenlegen
+ - bei den Settings wurde Setting[0] mit abgespeichert, welches es nicht gab.
+ - in Zukunft werden bei neuen EEPROM-Settings die Kanäle von Setting 1 übernommen
+ - Variablen NaviWindCorrection, NaviSpeedCompensation, NaviOperatingRadius eingeführt
+
+0.71f: H.Buss 15.11.2008
+ - Ausschalten der Höhenregelung per Schalter um 0,3 sek verzögert
+ - bei der seriellen Übertragung hat die FC jetzt als SlaveAdresse die 1
+ - VersionInfo.NaviKompatibel eingeführt
+ - wenn manuell gegiert wird, wird der GyroKompass-Wert auf den Kompasswert gesetzt
+ - Luftdruckwert wird an das Navi übertragen 
+ - Der Baro-Offset wird jetzt nachgeführt, um den Messbereich zu erweitern. Geht nur bei Höhenregler mit Schalter
+ - Debugdaten können jetzt mit 'f' gepollt werden
+ 
+0.71g: Gregor 09.12.2008
+ - Kommunikation überarbeitet
+ Infos hier: http://www.mikrokopter.de/ucwiki/en/SerialCommands 
+ 
+0.71h: H.Buss 15.12.2008 
+ - Freigegebene Version
+ - NaviAngleLimitation als Parameter zum Navi implementiert 
+ - Antwort auf CMD: 't' entfernt
+ 
+0.72d: H.Buss 22.01.2009 
+ - OCTO als Compilerschalter
+ - Unterstützung der FC 2.0 (ME)
+ - GYRO_D eingeführt
+ - Achsenkopplung jetzt auch auf Nick/Roll-Bewegung 
+ 
+0.72e: H.Buss 27.01.2009
+ - die 0.72d hatte kein Integral im Gier
+ - Parameter eingeführt:
+       EE_Parameter.NaviGpsPLimit
+       EE_Parameter.NaviGpsILimit
+       EE_Parameter.NaviGpsDLimit
+       EE_Parameter.NaviPH_LoginTime  
+       EE_Parameter.AchsKopplung2 
+       EE_Parameter.CouplingYawCorrection
+
+0.72f: H.Buss 28.01.2009 
+ - Bug im Ersatzkompass entfernt
+
+0.72h: H.Buss 05.02.2009
+ - Algorithmen beschleunigt -> Floats durch Fixkomma ersetzt
+ - Achsentkopplung weiter verbessert
+ - Nick- und Roll im Octo-Mischer auf jeweils vier Motoren aufgeteilt
+
+0.72i: H.Buss 07.02.2009
+ - Abtastrate von 1kHz auf 2kHz erhöht
+
+0.72j: H.Buss 09.02.2009
+ - neue Implementierung der Servoausgänge
+
+0.72k: H.Buss 10.02.2009
+ - Abtastrate auf 5kHz erhöht
+
+0.72L: H.Buss 13.02.2009
+ - Signalfilterung überarbeitet
+ - OCTO2 implementiert
+
+0.72M: H.Buss 13.02.2009
+ - Code Cleanup
+
+0.72o: H.Buss 24.02.2009
+ - Abtastrate auf 2kHz
+ - HW-Version an Navi
+ - neuer Datensatz 'c' -> Lagedaten für 3D-Grafik
+ - Auswerteroutine für Spectrum-Satteliten implementiert
+ - Kanalsettings werden beim Parameterreset nicht mehr gelöscht
+ - die Driftkompensation wird jetzt feiner aufgelöst --> EE_Parameter.Driftkomp muss mal 8 genommen werden
+ - die Integrale und ACC-Werte werden jetzt im Scope in ca. 0,1° angezeigt (wie beim NaviBrd)
+  
+0.72p: H.Buss 01.03.2009
+ - Octo3 erstellt
+ - Analogwerte umbenannt
+
+0.73a-d: H.Buss 05.04.2009
+ - MixerTabelle implementiert
+ - I2C-Bus auf bis zu 12 Motoren erweitert
+ - die Busfehler der BL-Regler werden im Menü angezeigt
+ - Revision der MixerTabelle eingeführt
+ - MixerTabelle wird bei Parameterreset neu initialisiert
+ - Motortest auf [12] erweitert 
+ - Motorschalter nicht mehr 3-Stufig
+
+0.74a
+ - Datenfusion im Flug auch, wenn ACC-Z < 512
+ - Wert für die Luftdruck-Messbereichserweiterung abgefangen
+
+0.74d
+ - Die Driftkompensation ist jetzt dreistufig -> 0,5% pro sekunde zusätzlich eingeführts
+ 
+0.75a G.Stobrawa 22.5.2009
+ - Extern Control also received from NC via SPI 
+
+0.75b H.Buss 27.05.2009
+ - Spektrum-Singale schalten den PPM-Eingang aus
+ - max. 2 Sekunden nach dem Start auf die BL-Regler warten
+ - Automatische Zellenerkennung, wenn Spannungswarnung < 5,0V
+   - Bei automatischer Zellenerkennung piept es je nach Zellenzahl
+ - EE_DATENREVISION auf 76 erhöht
+ - Servo:
+   - Roll-Servo für FC ME implementiert
+   - Update-Cmd stoppt Servos
+   - Servos werden erst nach dem ersten Kalibrieren aktiviert
+
+0.75c G.Stobrawa 25.7.2009
+ - Übertragung der Servo-Settings zur NC
+ - RSSI wird an NC gesendet, derzeit wird der Wert nicht gesetzt
+ - Bugfix Messbereichsumschaltung des Luftdrucksensors springt
+ - Auflösung des Luftdrucks nun bis auf 1 cm (5mal feiner) zur genaueren Berechnung des D-Anteils
+ - Unterstützung von Warnings-Bitmasks für die J16, J17-Outputs bei Unterspannung
+ - Unterspannung für einzelne Zelle´n von 3.2V auf 3.3V angehoben (9.6V --> 9.9V für 3S)
+ 
+0.75d H.Buss 13.8.2009
+ - RC-Routine: Empfangsausfall soll sicherer erkannt werden
+ - Zellenerkennung nun auch beim Speichern der Settings
+ - Warnungs-Blinkmaske auch bei Empfangsausfall 
+
+0.75e H.Buss 18.8.2009
+ - LED-Blinken kann an die Motoren gekoppelt werden
+ - Feinabstimmung des Höhenreglers
+ 
+0.75f H.Buss 27.8.2009
+ - D-Anteil des Höhenreglers jetzt mit Quadratischer Komponente
+ - Lagewinkel wirkt jetzt mit 1/Cos(x) mit in den Höhenregler
+ - leichte Modifikation der RC-Empfangroutine
+
+0.75g H.Buss 31.08.2009
+ - die Akkuspannung geht jetzt antiproportional ins Gas ein
+
+0.75h H.Buss 3.09.2009
+ - im Höhenregler werden jetzt die Stellwerte begrenzt --> max +- 16% vom geschätzten Schwebegas
+
+0.75i H.Buss 7.09.2009
+ - GpsZ vom Navi zur FC für den Höhenregler
+ - "hoovergas-Variation" als Parameter
+ - Kompatibilität zu NC und PC erhöht
+
+0.75j H.Buss 17.09.2009
+ - Laufzeitzähler eingebaut
+
+0.75k H.Buss 22.09.2009
+ - zweite Variante (Gregor) der Höhenregelung implementiert
+ - umschaltbare RC-Routine
+
+0.75L H.Buss 23.09.2009
+ - SollHoehe und Gas geht nun auch an die NC
+
+0.75M H.Buss 29.09.2009
+ - Spektrum-Timing wird nun überwacht
+ - die FC kann nun stand-Alone als Kamera-Stabilizer eingesetzt werden, weil die Servos aktiviert werden, wenn I2C fehlt
+ 
+0.75N H.Buss 29.09.2009
+ - Hoover-Stickpunkt wird bei aktivem Höhenregler nicht nachgeführt
+ - Hoover-Stickpunkt kann per Parameter fest eingestellt werden
+ - Baro-Messbereichserweiterung auch bei aktiviertem Höhenregler
+ - Gyro_Gier_P und Gyro_Gier_I eingeführt
+ - I2C_fehler-Zähler jetzt in den Analogdaten
+
+0.75o H.Buss 01.10.2009
+ - der Höhenregler wird jetzt nur alle 10ms bearbeitet
+ - Baro-Messbereichserweiterung auch bei Poti als Sollwert
+
+0.76d H.Buss 10.10.2009
+ - bei aktiver Messbereichserweiterung wird die aktuelle Höhe übernommen
+
+0.76e H.Buss 27.10.2009
+ - es werden beim Start einmal alle BL-Regler angesprochen, damit BL-Regler#8 auch einen Selbsttest macht
+ - S3D-ACT-Summensignal als Compilerschalter
+
+0.76f H.Buss 05.11.2009
+ - untere Spannungsgrenze der Unterspannungswarnung (9,3V) entfernt
+ 
+0.76g H.Buss 10.11.2009
+ - Casting-Fehler in der Gas-Berechnung
+
+0.77a H.Buss 11.11.2009
+ - Erweiterung auf 12 Kanäle
+ - Bei Koptertool-Kanalabfrage kein Empfangsausfall-Piepsen
+ - serielle Kanalerweiterung eingebaut -> PPM_in auf 25 erweitert
+ - Servos3-5 einstellbar
+ - neues Kommando "f" -> schaltet auf anderen Parametersatz um
+
+0.77b H.Buss 09.12.2009
+ - JetiBox: Menü wird übertragen
+ - neu: FCFlags |= FCFLAG_I2CERR;
+ - LED-Warn-Blinken nun mit festem Timing und abschaltbar
+ 
+0.77c H.Buss 07.01.2010
+ - zwei weitere Spektrum-Varianten implementiert
+
+0.77d H.Buss 25.01.2010
+ - Strom-Messung eingebaut
+ 
+0.78a H.Buss 03.02.2010
+ - Bugfix: Settingsumschaltung im Flug
+
+0.78b H.Buss 
+ - veröffentlichte Version
+
+0.78c H.Buss + G.Stobrawa 22.2.2010
+ - Bewegungsbegrenzung an Servo 3 to 5 der FC 2.0
+ - Theoretischer Variablenüberlauf bei Vario-Höhenregler
+ - Anzeige des "SPI RX communication error" wenn GPS Option nicht aktiv
+ - LED-Schwellwerte fürs Blinken waren unterschiedlich
+
+0.78c H.Buss + G.Stobrawa 04.3.2010
+ - Code cosmetics
+
+0.78f H.Buss + I.Busker 23.3.2010
+ - Unterstützung für Jeti-Expander
+ - Begrenzung des Vario-Höhenreglers auf ein 10m-Fenster um Überläufe zu verhindern
+ - Einführung eines Vario-Zeichens (+/-/ ) auf der Jetibox 
+ - BL-Timeout beim Start erhöht 
+
+0.80a-d H. Buss + G.Stobrawa 20.5.2010 - 22.7.2010
+ - Motoren Starten nicht ohne Kalibrierung
+ - Unterstützung der BL2.0-Regler
+    - statt 8 nun 10 Bit Auflösung der Lageregekung
+    - Unterstützung der BL2.0-Regler Konfiguration via MK-Tool
+    - Parametersätze werden per I2C an die BL-Regler durchgereicht
+ - "Care-Free" implementiert
+ - Freie Belegung der "Vorne"-Richtung
+ - nur wenn Motoren laufen: Beepen, wenn Carefree ohne Navi oder ohne gültigen MK3Mag-Wert
+ - nur wenn Motoren laufen: Beepen wenn NC plötzlich ausfällt
+ - #define RECEIVER_SPEKTRUM_EXP eingeführt
+ - #define SWITCH_LEARNS_CAREFREE eingeführt
+ - Schwerpunktanzeige in den 3D-Daten
+ - Checksummen gesicherte Datenablage im EEProm
+ - Fehlerdiagnose implementiert (Wiki: ErrorCodes)
+ - ErrorCode aufs Jeti-Display
+
+ - JetiMenü: bis acht Temperaturen der BL-Regler
+   - GPSInfo.Speed im Jeti-Display
+   - Compass-Richtung nun im Jeti-menü
+
+ - diverse Änderungen im Höhenregler
+   - P wirkt schwächer
+   - D wirkt stärker
+   - Anpassung der Höhenregelung auf Level des Hoovergases
+   - AccZ schneller nachführen
+
+ Parameter modifiziert:
+   - EEPROM-Kompatibilität auf 84 -> Parameter werden resettet
+   - EE_Parameter.Hoehe_ACC_Wirkung = 0; // war 30
+   - EE_Parameter.Hoehe_HoverBand = 8;   // war 5
+   - Notgas = 45
+   - NotgasZeit = 90
+   - Beginnersetting: EE_Parameter.DynamicStability = 70;
+   - Neu: GyroStability = 6
+   - GPS-Login-Time auf 2 reduziert
+
+0.80e H.Buss 02.08.2010
+ - MK3Mag ohne NC ging nicht
+
+0.80f H.Buss 04.08.2010
+ - Beim Höhenregler "Deckel" wird das Gas wieder wie in der alten Version behandelt und der D-Anteil auf das alte Verhalten (um Faktor 8) reduziert
+
+0.80g H.Buss 11.08.2010
+ - erweitetern Messbereich für Luftdruck bei der FC2.1 aktiviert
+
+0.80h H.Buss 30.08.2010
+ - bei I2C-Fehlern wurden die Counter zurück gesetzt und für einige ms die Interrupts angehalten - das ist jetzt behoben
+ - Nur I2C-Daten senden, wenn das alte Paket komplett raus ist
+
+0.82a H.Buss 08.11.2010
+ - MotorSafetySwitch - Verriegelt das Ein/Ausschalten
+ - ServoManualControlSpeed - Verlangsamt das Cam-Servo
+ - CamOrientation - für verdrehte Kamera-Servos
+ - Position der Status-Bits verändert
+ - "Zucken" der Servos bei kurzen Empfangsausfällen behoben
+ - jeti update command 'j' added
+ - Poti-Auswertung nach ParameterZuordnung() verschoben -> FC-Code schneller
+ - Waypont-Events z.B. zum Triggern der Kamera
+ - Gyro-Sytbility: Werte bis 16 möglich
+
+0.82b H.Buss 08.12.2010
+ - Unterstützung von 3,3V-Referenzspannung (nur ATMEGA128)
+
+0.84a H.Buss 21.03.2011 (Release: 30.03.2011)
+ - nur starten, wenn NC_ErrorCode = 0
+ - Beeptime von NC auch beim Kalibrieren durchlassen
+ - Varible "JetiBeep" eingeführt
+ - Kompass-Winkelvorgabe von NaviControl -> POI
+ - Piepen beim Umschalten von CareFree
+ - Compass-Routinen überarbeitet
+ - Dafaultvalues Servo-Min/MAx an MKDS18 angepasst
+ - Defaultreceiver ist RECEIVER_JETI
+ - GPS-Operation-Radius per default auf 245m bzw. 100%
+ - Höhenvorgabe im Vario-Mode durch Waypoints
+ - bei laufenden Motoren keine neuen Settings annehmen
+ - immer einmal Carefree Beepen nach dem Kalibrieren 
+ - Kanaloffset für Potis von 110 auf 127 erhöht, damit es gleich ist mit allen anderen Kanälen
+ - POI-Richtung (Soll-Himmelsrichtung) bezieht sich auf den Kamera-Winkel
+
+0.86a H.Buss 13.09.2011
+ - Variable "JetiBeep" wird gelöscht, wenn an den Empfänger gesendet wurde
+ - wenn GPS deaktiviert ist, keinen Fehler bringen, wenn GPS fehlt. Auch dann nicht piepsen
+ - GPS-Sollwertverschiebung
+ - Empfangs-Piepen unterdrücken -> einstellbar
+ - MotorSmooth einstellbar
+ - Höhenregler: keine 'harte' IstWert-Übernahme bei Bewegen des Sticks in die Hoover-Position
+ - Coming Home mit Höhenvorgabe
+ - Coming Home als Failsafe
+ - Einführung des GPS-Characters (- / W H D P) 
+ - Klartext bei den Jeti-Fehlermeldungen
+ - Jeti-Beep "3*kurz" bei NC-Errors
+ - Jeti-LCD-Aufruf nur noch alle 300ms, weil die Werte zu unruhig waren 
+ - Mixer-Settings werden nicht gelöscht, wenn sich die Parameter-Revision ändert 
+ - GPS-Angle limit von 100 auf 140
+ - GPS-I-Limit von 75 auf 85
+ - GAS-Offset von 120 auf 127 erhöht, damit es für alle Kanäle gleich ist
+ - EE_Parameter.Hoehe_StickNeutralPoint auf Werte zwischen 80 und 180 begrenzt
+ - PPM_Neutral eingeführt, um den Offset bei HoTT auszugleichen;
+ - LED_Update() nun nur noch alle 20ms, weil die schnellste Ausgabe (bei Potivorgabe) ohnehin nur 40ms sind
+ - Jeti & HoTT: Nur beim Fehler auch JetiBeep, wenn die Motoren laufen -> sonst nervt das bei der Fehlerbehebung (Compass-Kalibrieren usw.)
+ - Error-Text auch im virtuellen Display des Koptertools
+ - virtuelles LCD-Menü:
+   - "ExternControl" aus Platzgründen aus dem virtuellen LCD-Menü entfernt.
+   - keine BL-Temperaturen und I2C-Fehler anzeigen, wenn die BL-Regler nicht verwendet werden
+ - nach dem Gieren nicht den Ersatzkompass auf den Kompasswert stellen, die Umschaltung war zu hart
+ - ACC Correction eingeführt
+ - I2C Fehler kamen nicht bei der NC an, weil die zu kurz waren - jetzt meldet die NC die Fehler mind. 8 Sekunden
+ - Fehlermeldungen stehen jetzt mind. so lange an, bis sie an die Nc ge	sendet wurden
+ - neue Fehlermeldungen: 
+		"No NC communicat",  // 9
+		"GPS Fix lost    ",  // 21
+		"Magnet Error    ",  // 22
+		"Motor restart   ",  // 23
+		"BL Limitation   "   // 24
+ - LED: Schaltfläche "nur bei Motor start" bei beiden getrennt
+ - Ausbau der HoTT-Telemetrie
+ - Variable "KompassRichtung" entfernt
+ - ErsatzKompassInGrad sinvoll genutzt
+ - HoTT-Update per Uart-Durchschleifen
+ - AltitudeSetpointTrimming eingeführt
+ - Vario-Anzeige für HoTT
+ - Verhindern eines Überlaufs im Vario
+ - echter Varioton auch ohne Vario-Höhenregler
+ - Flugminuten laufen jetzt bei (FC_StatusFlags & FC_STATUS_FLY) los, weil sonst die Zeit zur NC verschieden war
+ - KompassFusion wird jetzt getrennt von der NC berechnet
+ - Sport-Setting entfernt und ein "Easy-Setting" eingeführt (leicht reduzierte Sticks); "Beginner" ist jetzt "Normal"
+ - MagnetError kann man in der Startphase ignorieren
+ - BL-Temperaturen, I2C-Fehler und BL-MaxPWM zum Loggen an NC
+ - Einzelströme nun auch bei HoTT angezeigt
+ 
+0.86b H.Buss 20.09.2011
+ - Höhenbegrenzung bewirkt nur, dass im Vario-Mode der Sollwert nicht weiter nach oben geschoben werden kann
+ - grüne LED ging aus - gefixt
+ - K1-K8 wurden im LCD mit 0-7 bezeichnet
+
+0.86c H.Buss 22.09.2011
+ - Neue Anzeige: Magnetfeld und Inklination bei HoTT und Jeti 
+ - Neuer SPI-Block 'SPI_MISC'
+ - Kompass-Fusions-Dämpfung bei Neigung leicht verringert
+ - '.' im Vario-Höhenregler
+
+0.86d H.Buss 26.09.2011
+ - Analog.c: Vario Überlauf anders verhinden
+ - Poti1-6 auch im HoTT-Display
+
+0.88 H.Buss 12.12.2011 - 26.03.2012
+- Failsafe-Kanal
+- Failsafe: 5 Sekunden warten & Höhe ändern (macht die NC)
+- Option: Failsafe-Sinkflug xx% Schwebegas
+- Stopp der Motoren wenn bei Failsafe ein Motor blockiert
+- von 30 auf 60 Sekunden Failsafe-Zeit verlängert
+- Höhenwert auf cm kalibriert (zeigte ca. 10% zu viel an)
+- Neue Error-Codes: "No SD-Card", "Flying range!" und "Error SD-Logging"
+- Wenn die Motoren aus sind, den Luftduckwert langsam nachführen
+- das sbus-protokoll implementiert (nur FC2.1)
+- Schaltkanal auf Servo-Ausgang
+- Filter auf den Ausgängen der Servos
+- Option: Failsafe-Sinkflug xx% Schwebegas
+- "Max Altitude" als Parameter auf der SD-Karte im Navi -> Beeinflusst "Parameter_MaximumAltitude" (das niedrigste gilt) und es gibt eine Fehlermeldung "ERR:Max Altitude"
+- SPI-Protokoll: BL.Status eingefügt und Parameter.GlobalConfig & Parameter.ExtraConfig verschoben
+- Senden der Out1 & Out2-Zustände an die NC, damit es in der OSD-Darstellung angezeigt werden kann
+- Kompassrichtung neu merken, wenn CF geschaltet wird
+- "I" aus dem Hott-Menü entfernt und durch ":" ersetzt, weil das nur auf der mx-20 gut aussah
+- Höhenregler-Settings: GPS-Z von 64 auf 20 reduziert
+
+0.88M H.Buss 15.05.2012
+- HoTT V4
+- Kamera-Servo beim Kalibrieren weiter laufen lassen.
+- Error 30: no GPS fix bei Start
+- echter MotorSchalter
+
+0.88n H.Buss 06.07.2012
+ - Bugfix: Der letzte angesteuerte Servo-Puls war zu kurz
+
+0.90 H.Buss 04.03.2013
+ - Anzeige WP x/Y in der HoTT-Telemetrie
+ - Schalter und WP-Event gleichzeitig
+ - Photo-Auslösung als Entfernungsintervalle
+ - Jeti + 
+ - Kamera-Neitung als Integral
+ - RC-Lost am Startpunkt macht kein Failsafe, wenn GAS auf Null für 1,5sek war 
+ - Auswahl:Speak-All nun in der KopterTool-Config
+ 
+ 0.90e H.Buss 04.03.2013
+  - Parameter_ServoRollComp jetzt auf Poti /Kompatibilität auf 93 erhöht)
+
+ 0.90f (26.04.2013)
+  - disable Yawing when Gas-Stick is to Zero
+  - calibration must be within 20° Tilt angle 
+  - Hold I-Parts of the attitude control to zero when the MK is still on the ground
+  - ACC-Altitude sensor data fusion implemented to the altitude controller  (HW-Update from FC2.1 to 2.2 needed)
+  - MK must be within 20° tilt angle when calibrating sensors 
+  - Parameter Reset, if the HW-Version changes (FC2.1 to 2.2)
+
+ 0.90g (29.04.2013)
+  - No ACC-Z error if the MK is tilted after switching on 
+  - ATMEGA644 (until FC2.0): Sensitive RC-Signal validation removed -> that was only nessecary for old 35MHz receivers
+
+ 0.90h (14.05.2013)
+  - Auto Start and landing for Waypoints
+  - back to old eeprom-compatiblity to remain compatible to other Tools
+  - HoTT-Bugfix: no speech while vario tone
+  - Bugfix: Wrong error speech in JetiEX ("Error calibration")
+ 
+ 0.90j (27.05.2013) 
+  - Changes for better EEPROM-Safety
+  - variable ActiveParamSet instead of the direct EEPROM-Reading (faster)
+  - Checking the ACC-Z value in flight and report ACC-Z if out of range
+  - disable Altitude hold in case of ACC-Z error
+  
+ 2.00a (after public Beta test 0.91)
+  - GPS-Parameter changed (P = 90->100; I = 90->90; D = 90->120; A = 40)
+  - Move NICK/Roll Sticks for switching on / off
+  - Move the Stick > 100 instead > 75 for switch on / off
+  - Failsafe active if ACC-Upgarde
+  - AltitudeMode, GPS_Mode & Carefree_Mode are now direct channels instead of Poti-Values (NaviGpsModeChannel,CareFreeChannel,HoeheChannel) 
+  - NC-SPI communication from 25Hz to 41Hz
+  - MotorTemperature and GPS-Mode-Switch more often to NC
+  - Auto-Start/Landing
+  - JetiEX: Name set to 'MK'
+  - if(CareFree) Parameter_AchsKopplung1 += 30; removed
+  - StickNeutral setting per default  127
+  - UART-Buffer increased from 175 to 220 Bytes 
+  - show name of active parameter set in the HoTT/Jeti display
+  - fixed in 0.91L: if "ServoRelative" is used, it coud happen that the servo moves a wide range in the first second after the first calibration
+  - Servo3-5 Limit to 24-255
+  - no. of channels increased from 12 to 16
+//  0 -> frei bzw. ACT rssi (or zero if unsigned)
+//  1 - 16 -> 1-16
+// 17 - 28 -> 12 Serial channels
+// 29 -> WP-Event kanal
+// 30 Fix -> -127 
+// 31 Fix -> 0
+// 32 Fix -> 128
+  
