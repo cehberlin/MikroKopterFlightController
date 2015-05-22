@@ -1,8 +1,12 @@
+/GPS.d
+/Flight-Ctrl_MEGA1284P_V2_00a_SVN.map
 # Object files
 *.o
 *.ko
 *.obj
 *.elf
+*.d
+*.lst
 
 # Precompiled Headers
 *.gch
