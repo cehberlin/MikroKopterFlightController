@@ -102,7 +102,7 @@ void SbusUartInit(void)
         UCSR1C &= ~(1 << UMSEL11);
         UCSR1C &= ~(1 << UMSEL10);
         // parity
-        UCSR1C <=  (1 << UPM11);   // even
+        UCSR1C |=  (1 << UPM11);   // even
         UCSR1C &= ~(1 << UPM10);
         //  stop bit
         UCSR1C |= (1 << USBS1);    // two
