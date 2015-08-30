@@ -6,28 +6,28 @@ Flight Control
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // + Software Nutzungsbedingungen (english version: see below)
 // + der Fa. HiSystems GmbH, Flachsmeerstrasse 2, 26802 Moormerland - nachfolgend Lizenzgeber genannt -
-// + Der Lizenzgeber räumt dem Kunden ein nicht-ausschließliches, zeitlich und räumlich* unbeschränktes Recht ein, die im den
-// + Mikrocontroller verwendete Firmware für die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool 
-// + - nachfolgend Software genannt - nur für private Zwecke zu nutzen.
-// + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulässig.
+// + Der Lizenzgeber rÃ¤umt dem Kunden ein nicht-ausschlieÃŸliches, zeitlich und rÃ¤umlich* unbeschrÃ¤nktes Recht ein, die im den
+// + Mikrocontroller verwendete Firmware fÃ¼r die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool 
+// + - nachfolgend Software genannt - nur fÃ¼r private Zwecke zu nutzen.
+// + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulÃ¤ssig.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// + Die vom Lizenzgeber gelieferte Software ist urheberrechtlich geschützt. Alle Rechte an der Software sowie an sonstigen im
-// + Rahmen der Vertragsanbahnung und Vertragsdurchführung überlassenen Unterlagen stehen im Verhältnis der Vertragspartner ausschließlich dem Lizenzgeber zu.
+// + Die vom Lizenzgeber gelieferte Software ist urheberrechtlich geschÃ¼tzt. Alle Rechte an der Software sowie an sonstigen im
+// + Rahmen der Vertragsanbahnung und VertragsdurchfÃ¼hrung Ã¼berlassenen Unterlagen stehen im VerhÃ¤ltnis der Vertragspartner ausschlieÃŸlich dem Lizenzgeber zu.
 // + Die in der Software enthaltenen Copyright-Vermerke, Markenzeichen, andere Rechtsvorbehalte, Seriennummern sowie
-// + sonstige der Programmidentifikation dienenden Merkmale dürfen vom Kunden nicht verändert oder unkenntlich gemacht werden.
-// + Der Kunde trifft angemessene Vorkehrungen für den sicheren Einsatz der Software. Er wird die Software gründlich auf deren
+// + sonstige der Programmidentifikation dienenden Merkmale dÃ¼rfen vom Kunden nicht verÃ¤ndert oder unkenntlich gemacht werden.
+// + Der Kunde trifft angemessene Vorkehrungen fÃ¼r den sicheren Einsatz der Software. Er wird die Software grÃ¼ndlich auf deren
 // + Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
-// + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulässig - begrenzt in Höhe des typischen und vorhersehbaren
-// + Schadens. Die gesetzliche Haftung bei Personenschäden und nach dem Produkthaftungsgesetz bleibt unberührt. Dem Lizenzgeber steht jedoch der Einwand 
+// + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulÃ¤ssig - begrenzt in HÃ¶he des typischen und vorhersehbaren
+// + Schadens. Die gesetzliche Haftung bei PersonenschÃ¤den und nach dem Produkthaftungsgesetz bleibt unberÃ¼hrt. Dem Lizenzgeber steht jedoch der Einwand 
 // + des Mitverschuldens offen.
-// + Der Kunde trifft angemessene Vorkehrungen für den Fall, dass die Software ganz oder teilweise nicht ordnungsgemäß arbeitet.
-// + Er wird die Software gründlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
+// + Der Kunde trifft angemessene Vorkehrungen fÃ¼r den Fall, dass die Software ganz oder teilweise nicht ordnungsgemÃ¤ÃŸ arbeitet.
+// + Er wird die Software grÃ¼ndlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
 // + Der Kunde wird er seine Daten vor Einsatz der Software nach dem Stand der Technik sichern.
-// + Der Kunde ist darüber unterrichtet, dass der Lizenzgeber seine Daten im zur Vertragsdurchführung erforderlichen Umfang
-// + und auf Grundlage der Datenschutzvorschriften erhebt, speichert, verarbeitet und, sofern notwendig, an Dritte übermittelt.
-// + *) Die räumliche Nutzung bezieht sich nur auf den Einsatzort, nicht auf die Reichweite der programmierten Software.
+// + Der Kunde ist darÃ¼ber unterrichtet, dass der Lizenzgeber seine Daten im zur VertragsdurchfÃ¼hrung erforderlichen Umfang
+// + und auf Grundlage der Datenschutzvorschriften erhebt, speichert, verarbeitet und, sofern notwendig, an Dritte Ã¼bermittelt.
+// + *) Die rÃ¤umliche Nutzung bezieht sich nur auf den Einsatzort, nicht auf die Reichweite der programmierten Software.
 // + #### ENDE DER NUTZUNGSBEDINGUNGEN ####'
-// +  Hinweis: Informationen über erweiterte Nutzungsrechte (wie z.B. Nutzung für nicht-private Zwecke) sind auf Anfrage per Email an info(@)hisystems.de verfügbar.
+// +  Hinweis: Informationen Ã¼ber erweiterte Nutzungsrechte (wie z.B. Nutzung fÃ¼r nicht-private Zwecke) sind auf Anfrage per Email an info(@)hisystems.de verfÃ¼gbar.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // + Software LICENSING TERMS
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -68,7 +68,7 @@ unsigned int NeutralAccX=0, NeutralAccY=0;
 int NaviAccNick, NaviAccRoll,NaviCntAcc = 0;
 int NeutralAccZ = 0;
 signed char NeutralAccZfine = 0;
-unsigned char ControlHeading = 0;// in 2°
+unsigned char ControlHeading = 0;// in 2ï¿½
 long IntegralNick = 0,IntegralNick2 = 0;
 long IntegralRoll = 0,IntegralRoll2 = 0;
 long IntegralAccNick = 0,IntegralAccRoll = 0,IntegralAccZ = 0;
@@ -167,7 +167,7 @@ unsigned char Parameter_ExtraConfig;
 unsigned char Parameter_MaximumAltitude;
 unsigned char Parameter_Servo3,Parameter_Servo4,Parameter_Servo5;
 unsigned char CareFree = 0;
-const signed char sintab[31] = { 0, 2, 4, 6, 7, 8, 8, 8, 7, 6, 4, 2, 0, -2, -4, -6, -7, -8, -8, -8, -7, -6, -4, -2, 0, 2, 4, 6, 7, 8, 8}; // 15° steps
+const signed char sintab[31] = { 0, 2, 4, 6, 7, 8, 8, 8, 7, 6, 4, 2, 0, -2, -4, -6, -7, -8, -8, -8, -7, -6, -4, -2, 0, 2, 4, 6, 7, 8, 8}; // 15Â° steps
 
 signed int ExternStickNick = 0,ExternStickRoll = 0,ExternStickGier = 0, ExternHoehenValue = -20;
 int MaxStickNick = 0,MaxStickRoll = 0;
@@ -182,6 +182,13 @@ unsigned int GasIsZeroCnt = 0; // to detect that the gas-stick is down for a whi
 signed int Variance = 0;
 signed int CosAttitude;	// for projection of hoover gas
 unsigned char ACC_AltitudeControl = 0;
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//  return true if external control is activated
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+unsigned char isExternalControlEnabled(void){
+  return (ExternControl.Config & 0x01) && Parameter_ExternalControl > 128;
+}
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  Debugwerte zuordnen
@@ -203,13 +210,20 @@ void CopyDebugValues(void)
     DebugOut.Analog[13] = Motor[1].SetPoint;
     DebugOut.Analog[14] = Motor[2].SetPoint;
     DebugOut.Analog[15] = Motor[3].SetPoint;
+    // current pitch, roll, yaw and throttle
+    DebugOut.Analog[16] = StickNick;
+    DebugOut.Analog[17] = StickRoll;
+    DebugOut.Analog[18] = StickGier;
+    DebugOut.Analog[19] = StickGas;
     DebugOut.Analog[20] = ServoNickValue;
-	DebugOut.Analog[21] = HoverGas;
+    DebugOut.Analog[21] = HoverGas;
     DebugOut.Analog[22] = Capacity.ActualCurrent;
     DebugOut.Analog[23] = Capacity.UsedCapacity;
-	DebugOut.Analog[24] = SollHoehe/10;	
+    DebugOut.Analog[24] = SollHoehe/10;
+    DebugOut.Analog[25] = isExternalControlEnabled(); //current external control state
+    // 26 OPEN
     DebugOut.Analog[27] = KompassSollWert;
-	DebugOut.Analog[29] = Capacity.MinOfMaxPWM;
+    DebugOut.Analog[29] = Capacity.MinOfMaxPWM;
     DebugOut.Analog[30] = GPS_Nick;
     DebugOut.Analog[31] = GPS_Roll;
     if(VersionInfo.HardwareError[0] || VersionInfo.HardwareError[1]) DebugOut.Status[1] |= 1; else DebugOut.Status[1] &= 0xfe;
@@ -219,7 +233,6 @@ void CopyDebugValues(void)
 //DebugOut.Analog[25] = Parameter_Hoehe_P;
 //DebugOut.Analog[26] = Parameter_Luftdruck_D;
 }
-
 
 void Piep(unsigned char Anzahl, unsigned int dauer)
 {
@@ -250,7 +263,7 @@ void CalibrierMittelwert(void)
 {
     unsigned char i;
     if(PlatinenVersion == 13) SucheGyroOffset();
-    // ADC auschalten, damit die Werte sich nicht während der Berechnung ändern
+    // ADC auschalten, damit die Werte sich nicht wÃ¤hrend der Berechnung Ã¤ndern
 	ANALOG_OFF;
 	MesswertNick = AdWertNick;
 	MesswertRoll = AdWertRoll;
@@ -301,7 +314,7 @@ unsigned char SetNeutral(unsigned char AdjustmentMode)  // retuns: "sucess"
 
 	CalibrierMittelwert();
 
-    if((EE_Parameter.GlobalConfig & CFG_HOEHENREGELUNG))  // Höhenregelung aktiviert?
+    if((EE_Parameter.GlobalConfig & CFG_HOEHENREGELUNG))  // HÃ¶henregelung aktiviert?
      {
       if((MessLuftdruck > 950) || (MessLuftdruck < 750)) SucheLuftruckOffset();
      }
@@ -396,7 +409,7 @@ unsigned char SetNeutral(unsigned char AdjustmentMode)  // retuns: "sucess"
 		tilt1 = (int16_t)ihypot(tilt1,tilt2); 			// tilt angle over all 
 		CosAttitude = c_cos_8192(tilt1); 				
 		NeutralAccZ = (long)((long) (NeutralAccZ - 512) * 8192 + 4096) / CosAttitude + 512;
-		if(tilt1 > 20) sucess = 0; // calibration must be within 20° Tilt angle 
+		if(tilt1 > 20) sucess = 0; // calibration must be within 20Â° Tilt angle 
 		if(AdjustmentMode != 0 && ACC_AltitudeControl) if((NeutralAccZ < 682 - 25) || (NeutralAccZ > 682 + 25)) { VersionInfo.HardwareError[0] |= FC_ERROR0_ACC_TOP; sucess = 0;};
 #else
 	NeutralAccZ = (int16_t)GetParamWord(PID_ACC_TOP);
@@ -488,7 +501,7 @@ void Mittelwert(void)
 			TrimRoll = tmpl - tmpl2 / 100L;
 			TrimNick = -tmpl2 + tmpl / 100L;
 // Kompasswert begrenzen  ++++++++++++++++++++++++++++++++++++++++++++++++
- 		    if(ErsatzKompass >= (360L * GIER_GRAD_FAKTOR)) ErsatzKompass -= 360L * GIER_GRAD_FAKTOR;  // 360° Umschlag
+ 		    if(ErsatzKompass >= (360L * GIER_GRAD_FAKTOR)) ErsatzKompass -= 360L * GIER_GRAD_FAKTOR;  // 360Â° Umschlag
  		    if(ErsatzKompass < 0)                          ErsatzKompass += 360L * GIER_GRAD_FAKTOR;
 // Roll  ++++++++++++++++++++++++++++++++++++++++++++++++
             Mess_IntegralRoll2 += MesswertRoll + TrimRoll;
@@ -612,7 +625,7 @@ unsigned char GetChannelValue(unsigned char ch) // gives the unsigned value of t
 }
 
 //############################################################################
-// Trägt ggf. das Poti als Parameter ein
+// TrÃ¤gt ggf. das Poti als Parameter ein
 void ParameterZuordnung(void)
 //############################################################################
 {
@@ -712,7 +725,7 @@ void ParameterZuordnung(void)
 	carefree_old = 10;
    }	
 
- if(FromNaviCtrl.CompassValue < 0 && MotorenEin && CareFree && BeepMuster == 0xffff) // ungültiger Kompasswert
+ if(FromNaviCtrl.CompassValue < 0 && MotorenEin && CareFree && BeepMuster == 0xffff) // ungÃ¼ltiger Kompasswert
 	{
 	 beeptime = 15000;
 	 BeepMuster = 0xA400;
@@ -937,7 +950,7 @@ else SpeakHoTT = SPEAK_RISING;
 	                       ParamSet_ReadFromEEProm(ActiveParamSet);
 	                       LipoDetection(0);
 						   LIBFC_ReceiverInit(EE_Parameter.Receiver);
-                           if((Parameter_GlobalConfig & CFG_HOEHENREGELUNG))  // Höhenregelung aktiviert?
+                           if((Parameter_GlobalConfig & CFG_HOEHENREGELUNG))  // HÃ¶henregelung aktiviert?
                             {
                              if((MessLuftdruck > 950) || (MessLuftdruck < 750)) SucheLuftruckOffset();
                             }
@@ -1139,7 +1152,7 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //+ Analoge Steuerung per Seriell
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   if(ExternControl.Config & 0x01 && Parameter_ExternalControl > 128)
+   if(isExternalControlEnabled())
     {
 	 StickNick += (int) ExternControl.Nick * (int) EE_Parameter.Stick_P;
 	 StickRoll += (int) ExternControl.Roll * (int) EE_Parameter.Stick_P;
@@ -1249,7 +1262,7 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define ABGLEICH_ANZAHL 256L
 
- MittelIntegralNick  += IntegralNick;    // Für die Mittelwertbildung aufsummieren
+ MittelIntegralNick  += IntegralNick;    // FÃ¼r die Mittelwertbildung aufsummieren
  MittelIntegralRoll  += IntegralRoll;
  MittelIntegralNick2 += IntegralNick2;
  MittelIntegralRoll2 += IntegralRoll2;
@@ -1478,7 +1491,7 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
          NeueKompassRichtungMerken = 50; // eine Sekunde zum Einloggen
         };
      }
-    tmp_int  = (long) EE_Parameter.StickGier_P * ((long)StickGier * abs(StickGier)) / 512L; // expo  y = ax + bx²
+    tmp_int  = (long) EE_Parameter.StickGier_P * ((long)StickGier * abs(StickGier)) / 512L; // expo  y = ax + bxÂ²
     tmp_int += (EE_Parameter.StickGier_P * StickGier) / 4;
 	if(GasIsZeroCnt > 512) tmp_int = 0; // disable Yawing when Gas-Stick is to Zero
 	tmp_int += CompassGierSetpoint;
@@ -1496,10 +1509,10 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
 	  {
        int w,v,r,fehler,korrektur; // wird von der SPI-Routine auf 1 gesetzt
        CalculateCompassTimer = 13; // falls keine Navi-Daten
-	   // max. Korrekturwert schätzen
+	   // max. Korrekturwert schÃ¤tzen
        w = abs(IntegralNick /512); // mit zunehmender Neigung den Einfluss drosseln
        v = abs(IntegralRoll /512);
-       if(v > w) w = v; // grösste Neigung ermitteln
+       if(v > w) w = v; // grÃ¶sste Neigung ermitteln
 //       korrektur = w / 4 + 1;
 	   korrektur = w / 8 + 2;
 	   ErsatzKompassInGrad = ErsatzKompass/GIER_GRAD_FAKTOR;
@@ -1561,12 +1574,12 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
     if(MesswertGier < -MAX_SENSOR) MesswertGier = -MAX_SENSOR;
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Höhenregelung
+// HÃ¶henregelung
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   if(UBat > BattLowVoltageWarning) GasMischanteil = ((unsigned int)GasMischanteil * BattLowVoltageWarning) / UBat; // Gas auf das aktuelle Spannungvieveau beziehen
   GasMischanteil *= STICK_GAIN;
 	// if height control is activated
- if((Parameter_GlobalConfig & CFG_HOEHENREGELUNG) && !(Looping_Roll || Looping_Nick) && !(VersionInfo.HardwareError[0] & 0x7F))  // Höhenregelung
+ if((Parameter_GlobalConfig & CFG_HOEHENREGELUNG) && !(Looping_Roll || Looping_Nick) && !(VersionInfo.HardwareError[0] & 0x7F))  // HÃ¶henregelung
 	{
 		#define HOVER_GAS_AVERAGE 16384L		// 16384 * 2ms = 32s averaging
 		#define HC_GAS_AVERAGE 4    			// 4 * 2ms= 8ms averaging
@@ -1636,7 +1649,7 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
 			  BaroExpandActive--;
 		   }
 		// if height control is activated by an rc channel
-        if(Parameter_GlobalConfig & CFG_HOEHEN_SCHALTER)  // Regler wird über Schalter gesteuert
+        if(Parameter_GlobalConfig & CFG_HOEHEN_SCHALTER)  // Regler wird Ã¼ber Schalter gesteuert
 		{	// check if parameter is less than activation threshold
 			if(Parameter_HoehenSchalter < 50) // for 3 or 2-state switch height control is disabled in lowest position
 			{   //height control not active
@@ -1682,7 +1695,7 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
 		// I.e. it will work only if the gas stick is higher than the hover gas
 		// and the hover height will be allways larger than height setpoint.
 		FC_StatusFlags2 |= FC_STATUS2_ALTITUDE_CONTROL;
-        if((Parameter_ExtraConfig & CFG2_HEIGHT_LIMIT) || !(Parameter_GlobalConfig & CFG_HOEHEN_SCHALTER))  // Regler wird über Schalter gesteuert)
+        if((Parameter_ExtraConfig & CFG2_HEIGHT_LIMIT) || !(Parameter_GlobalConfig & CFG_HOEHEN_SCHALTER))  // Regler wird Ã¼ber Schalter gesteuert)
   	      {  // old version
 			HCGas = GasMischanteil; // take current stick gas as neutral point for the height control
 			HeightTrimming = 0;
@@ -1974,7 +1987,7 @@ if(HeightDeviation > 20) SollHoehe = HoehenWertF; // update setpoint to current 
 		if((FC_StatusFlags & FC_STATUS_FLY))// && !(FC_SatusFlags & FC_STATUS_EMERGENCY_LANDING))
 		{
 			//if(HoverGasFilter == 0 || StartTrigger == 1)  HoverGasFilter = HOVER_GAS_AVERAGE * (unsigned long)(GasMischanteil); // init estimation
-			if(HoverGasFilter == 0 || StartTrigger == 1)  HoverGasFilter = HOVER_GAS_AVERAGE * (unsigned long)(HoverGas); // 0.90f: geändert
+			if(HoverGasFilter == 0 || StartTrigger == 1)  HoverGasFilter = HOVER_GAS_AVERAGE * (unsigned long)(HoverGas); // 0.90f: geÃ¤ndert
 			if(StartTrigger == 1) StartTrigger = 2;
 				tmp_long2 = (int32_t)GasMischanteil; // take current thrust
 				tmp_long2 *= CosAttitude;            // apply attitude projection
@@ -2051,7 +2064,7 @@ if(HeightDeviation > 20) SollHoehe = HoehenWertF; // update setpoint to current 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Gier-Anteil
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    GierMischanteil = MesswertGier - sollGier * STICK_GAIN;     // Regler für Gier
+    GierMischanteil = MesswertGier - sollGier * STICK_GAIN;     // Regler fÃ¼r Gier
 #define MIN_GIERGAS  (40*STICK_GAIN)  // unter diesem Gaswert trotzdem Gieren
    if(GasMischanteil > MIN_GIERGAS)
     {
@@ -2076,8 +2089,8 @@ if(HeightDeviation > 20) SollHoehe = HoehenWertF; // update setpoint to current 
     if(SummeNick >  (STICK_GAIN * 16000L)) SummeNick =  (STICK_GAIN * 16000L);
     if(SummeNick < -(16000L * STICK_GAIN)) SummeNick = -(16000L * STICK_GAIN);
 
-    if(EE_Parameter.Gyro_Stability <= 8) 	pd_ergebnis_nick = (EE_Parameter.Gyro_Stability * DiffNick) / 8; // PI-Regler für Nick
-    else 									pd_ergebnis_nick = ((EE_Parameter.Gyro_Stability / 2) * DiffNick) / 4; // Überlauf verhindern
+    if(EE_Parameter.Gyro_Stability <= 8) 	pd_ergebnis_nick = (EE_Parameter.Gyro_Stability * DiffNick) / 8; // PI-Regler fÃ¼r Nick
+    else 									pd_ergebnis_nick = ((EE_Parameter.Gyro_Stability / 2) * DiffNick) / 4; // Ãœberlauf verhindern
     pd_ergebnis_nick +=  SummeNick / Ki;
 
     tmp_int = (long)((long)Parameter_DynamicStability * (long)(GasMischanteil + abs(GierMischanteil)/2)) / 64;
@@ -2093,8 +2106,8 @@ if(HeightDeviation > 20) SollHoehe = HoehenWertF; // update setpoint to current 
     if(SummeRoll >  (STICK_GAIN * 16000L)) SummeRoll =  (STICK_GAIN * 16000L);
     if(SummeRoll < -(16000L * STICK_GAIN)) SummeRoll = -(16000L * STICK_GAIN);
 
-    if(EE_Parameter.Gyro_Stability <= 8)  	pd_ergebnis_roll = (EE_Parameter.Gyro_Stability * DiffRoll) / 8;	// PI-Regler für Roll
-	else  									pd_ergebnis_roll = ((EE_Parameter.Gyro_Stability / 2) * DiffRoll) / 4;	// Überlauf verhindern
+    if(EE_Parameter.Gyro_Stability <= 8)  	pd_ergebnis_roll = (EE_Parameter.Gyro_Stability * DiffRoll) / 8;	// PI-Regler fÃ¼r Roll
+	else  									pd_ergebnis_roll = ((EE_Parameter.Gyro_Stability / 2) * DiffRoll) / 4;	// Ãœberlauf verhindern
     pd_ergebnis_roll += SummeRoll / Ki;
 	
     tmp_int = (long)((long)Parameter_DynamicStability * (long)(GasMischanteil + abs(GierMischanteil)/2)) / 64;

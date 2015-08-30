@@ -3,28 +3,28 @@
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // + Software Nutzungsbedingungen (english version: see below)
 // + der Fa. HiSystems GmbH, Flachsmeerstrasse 2, 26802 Moormerland - nachfolgend Lizenzgeber genannt -
-// + Der Lizenzgeber räumt dem Kunden ein nicht-ausschließliches, zeitlich und räumlich* unbeschränktes Recht ein, die im den
-// + Mikrocontroller verwendete Firmware für die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool 
-// + - nachfolgend Software genannt - nur für private Zwecke zu nutzen.
-// + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulässig.
+// + Der Lizenzgeber rÃ¤umt dem Kunden ein nicht-ausschlieÃŸliches, zeitlich und rÃ¤umlich* unbeschrÃ¤nktes Recht ein, die im den
+// + Mikrocontroller verwendete Firmware fÃ¼r die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool 
+// + - nachfolgend Software genannt - nur fÃ¼r private Zwecke zu nutzen.
+// + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulÃ¤ssig.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// + Die vom Lizenzgeber gelieferte Software ist urheberrechtlich geschützt. Alle Rechte an der Software sowie an sonstigen im
-// + Rahmen der Vertragsanbahnung und Vertragsdurchführung überlassenen Unterlagen stehen im Verhältnis der Vertragspartner ausschließlich dem Lizenzgeber zu.
+// + Die vom Lizenzgeber gelieferte Software ist urheberrechtlich geschÃ¼tzt. Alle Rechte an der Software sowie an sonstigen im
+// + Rahmen der Vertragsanbahnung und VertragsdurchfÃ¼hrung Ã¼berlassenen Unterlagen stehen im VerhÃ¤ltnis der Vertragspartner ausschlieÃŸlich dem Lizenzgeber zu.
 // + Die in der Software enthaltenen Copyright-Vermerke, Markenzeichen, andere Rechtsvorbehalte, Seriennummern sowie
-// + sonstige der Programmidentifikation dienenden Merkmale dürfen vom Kunden nicht verändert oder unkenntlich gemacht werden.
-// + Der Kunde trifft angemessene Vorkehrungen für den sicheren Einsatz der Software. Er wird die Software gründlich auf deren
+// + sonstige der Programmidentifikation dienenden Merkmale dÃ¼rfen vom Kunden nicht verÃ¤ndert oder unkenntlich gemacht werden.
+// + Der Kunde trifft angemessene Vorkehrungen fÃ¼r den sicheren Einsatz der Software. Er wird die Software grÃ¼ndlich auf deren
 // + Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
-// + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulässig - begrenzt in Höhe des typischen und vorhersehbaren
-// + Schadens. Die gesetzliche Haftung bei Personenschäden und nach dem Produkthaftungsgesetz bleibt unberührt. Dem Lizenzgeber steht jedoch der Einwand 
+// + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulÃ¤ssig - begrenzt in HÃ¶he des typischen und vorhersehbaren
+// + Schadens. Die gesetzliche Haftung bei PersonenschÃ¤den und nach dem Produkthaftungsgesetz bleibt unberÃ¼hrt. Dem Lizenzgeber steht jedoch der Einwand 
 // + des Mitverschuldens offen.
-// + Der Kunde trifft angemessene Vorkehrungen für den Fall, dass die Software ganz oder teilweise nicht ordnungsgemäß arbeitet.
-// + Er wird die Software gründlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
+// + Der Kunde trifft angemessene Vorkehrungen fÃ¼r den Fall, dass die Software ganz oder teilweise nicht ordnungsgemÃ¤ÃŸ arbeitet.
+// + Er wird die Software grÃ¼ndlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
 // + Der Kunde wird er seine Daten vor Einsatz der Software nach dem Stand der Technik sichern.
-// + Der Kunde ist darüber unterrichtet, dass der Lizenzgeber seine Daten im zur Vertragsdurchführung erforderlichen Umfang
-// + und auf Grundlage der Datenschutzvorschriften erhebt, speichert, verarbeitet und, sofern notwendig, an Dritte übermittelt.
-// + *) Die räumliche Nutzung bezieht sich nur auf den Einsatzort, nicht auf die Reichweite der programmierten Software.
+// + Der Kunde ist darÃ¼ber unterrichtet, dass der Lizenzgeber seine Daten im zur VertragsdurchfÃ¼hrung erforderlichen Umfang
+// + und auf Grundlage der Datenschutzvorschriften erhebt, speichert, verarbeitet und, sofern notwendig, an Dritte Ã¼bermittelt.
+// + *) Die rÃ¤umliche Nutzung bezieht sich nur auf den Einsatzort, nicht auf die Reichweite der programmierten Software.
 // + #### ENDE DER NUTZUNGSBEDINGUNGEN ####'
-// +  Hinweis: Informationen über erweiterte Nutzungsrechte (wie z.B. Nutzung für nicht-private Zwecke) sind auf Anfrage per Email an info(@)hisystems.de verfügbar.
+// +  Hinweis: Informationen Ã¼ber erweiterte Nutzungsrechte (wie z.B. Nutzung fÃ¼r nicht-private Zwecke) sind auf Anfrage per Email an info(@)hisystems.de verfÃ¼gbar.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // + Software LICENSING TERMS
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -70,9 +70,9 @@
 #define BLPARAM_REVISION 1
 #define MASK_SET_PWM_SCALING		0x01
 #define MASK_SET_CURRENT_LIMIT		0x02
-#define MASK_SET_TEMP_LIMIT			0x04
+#define MASK_SET_TEMP_LIMIT		0x04
 #define MASK_SET_CURRENT_SCALING	0x08
-#define MASK_SET_BITCONFIG			0x10
+#define MASK_SET_BITCONFIG		0x10
 #define MASK_RESET_CAPCOUNTER		0x20
 #define MASK_SET_DEFAULT_PARAMS		0x40
 #define MASK_SET_SAVE_EEPROM	 	0x80
@@ -148,7 +148,7 @@ const unsigned char ANALOG_TEXT[32][16] PROGMEM =
     
 	
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//++ Sende-Part der Datenübertragung
+//++ Sende-Part der DatenÃ¼bertragung
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ISR(USART0_TX_vect)
 {
@@ -170,7 +170,7 @@ ISR(USART0_TX_vect)
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//++ Empfangs-Part der Datenübertragung, incl. CRC-Auswertung
+//++ Empfangs-Part der DatenÃ¼bertragung, incl. CRC-Auswertung
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ISR(USART0_RX_vect)
 {
@@ -408,8 +408,8 @@ void BearbeiteRxDaten(void)
 					PcZugriff = 255;
 					break;
 
-			case 'q':// "Get"-Anforderung für Settings
-					// Bei Get werden die vom PC einstellbaren Werte vom PC zurückgelesen
+			case 'q':// "Get"-Anforderung fÃ¼r Settings
+					// Bei Get werden die vom PC einstellbaren Werte vom PC zurÃ¼ckgelesen
 					if(MotorenEin) break;
 					if((10 <= pRxData[0]) && (pRxData[0] < 20))
 					{
@@ -648,7 +648,7 @@ void BearbeiteRxDaten(void)
 }
 
 //############################################################################
-//Routine für die Serielle Ausgabe
+//Routine fÃ¼r die Serielle Ausgabe
 void uart_putchar (char c)
 //############################################################################
 {
@@ -734,7 +734,7 @@ void DatenUebertragung(void)
 		Debug_OK("Version gesendet");
 	}
 
-	if(GetExternalControl && UebertragungAbgeschlossen) 	      // Bei Get werden die vom PC einstellbaren Werte vom PC zurückgelesen
+	if(GetExternalControl && UebertragungAbgeschlossen) 	      // Bei Get werden die vom PC einstellbaren Werte vom PC zurÃ¼ckgelesen
 	{
 		SendOutData('G',MeineSlaveAdresse, 1, (unsigned char *) &ExternControl, sizeof(ExternControl));
 		GetExternalControl = 0;
@@ -757,14 +757,14 @@ void DatenUebertragung(void)
     	  SendOutData('C', FC_ADDRESS, 1, (unsigned char *) &Data3D,sizeof(Data3D));
           Timer3D = SetDelay(Intervall3D);
     	 }
-    if(DebugTextAnforderung != 255) // Texte für die Analogdaten
+    if(DebugTextAnforderung != 255) // Texte fÃ¼r die Analogdaten
      {
 		unsigned char label[16]; // local sram buffer
 		memcpy_P(label, ANALOG_TEXT[DebugTextAnforderung], 16); // read lable from flash to sra
       SendOutData('A', FC_ADDRESS, 2, (unsigned char *)&DebugTextAnforderung, sizeof(DebugTextAnforderung),label, 16);
       DebugTextAnforderung = 255;
 	 }
-     if(ConfirmFrame && UebertragungAbgeschlossen)   // Datensatz bestätigen
+     if(ConfirmFrame && UebertragungAbgeschlossen)   // Datensatz bestÃ¤tigen
 	 {
 		SendOutData('B', FC_ADDRESS, 1, (uint8_t*)&ConfirmFrame, sizeof(ConfirmFrame));
       	ConfirmFrame = 0;

@@ -4,9 +4,9 @@ Flight Control
 
 #ifndef _FC_H
 #define _FC_H
-//#define GIER_GRAD_FAKTOR 1291L // Abh‰ngigkeit zwischen GyroIntegral und Winkel
+//#define GIER_GRAD_FAKTOR 1291L // Abh√§ngigkeit zwischen GyroIntegral und Winkel
 //#define GIER_GRAD_FAKTOR 1160L
-extern long GIER_GRAD_FAKTOR; // Abh‰ngigkeit zwischen GyroIntegral und Winkel
+extern long GIER_GRAD_FAKTOR; // Abh√§ngigkeit zwischen GyroIntegral und Winkel
 #define STICK_GAIN 4
 #define ACC_AMPLIFY    6
 
@@ -104,6 +104,7 @@ extern void SendMotorData(void);
 //void Mittelwert(void);
 extern unsigned char SetNeutral(unsigned char AccAdjustment);  // retuns: "sucess"
 extern void Piep(unsigned char Anzahl, unsigned int dauer);
+extern unsigned char isExternalControlEnabled(void);
 extern void CopyDebugValues(void);
 extern unsigned char ACC_AltitudeControl;
 extern signed int CosAttitude;	// for projection of hoover gas
