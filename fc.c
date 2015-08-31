@@ -7,7 +7,7 @@ Flight Control
 // + Software Nutzungsbedingungen (english version: see below)
 // + der Fa. HiSystems GmbH, Flachsmeerstrasse 2, 26802 Moormerland - nachfolgend Lizenzgeber genannt -
 // + Der Lizenzgeber räumt dem Kunden ein nicht-ausschließliches, zeitlich und räumlich* unbeschränktes Recht ein, die im den
-// + Mikrocontroller verwendete Firmware für die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool 
+// + Mikrocontroller verwendete Firmware für die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool
 // + - nachfolgend Software genannt - nur für private Zwecke zu nutzen.
 // + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulässig.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -18,7 +18,7 @@ Flight Control
 // + Der Kunde trifft angemessene Vorkehrungen für den sicheren Einsatz der Software. Er wird die Software gründlich auf deren
 // + Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
 // + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulässig - begrenzt in Höhe des typischen und vorhersehbaren
-// + Schadens. Die gesetzliche Haftung bei Personenschäden und nach dem Produkthaftungsgesetz bleibt unberührt. Dem Lizenzgeber steht jedoch der Einwand 
+// + Schadens. Die gesetzliche Haftung bei Personenschäden und nach dem Produkthaftungsgesetz bleibt unberührt. Dem Lizenzgeber steht jedoch der Einwand
 // + des Mitverschuldens offen.
 // + Der Kunde trifft angemessene Vorkehrungen für den Fall, dass die Software ganz oder teilweise nicht ordnungsgemäß arbeitet.
 // + Er wird die Software gründlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
@@ -409,7 +409,7 @@ unsigned char SetNeutral(unsigned char AdjustmentMode)  // retuns: "sucess"
 		tilt1 = (int16_t)ihypot(tilt1,tilt2); 			// tilt angle over all 
 		CosAttitude = c_cos_8192(tilt1); 				
 		NeutralAccZ = (long)((long) (NeutralAccZ - 512) * 8192 + 4096) / CosAttitude + 512;
-		if(tilt1 > 20) sucess = 0; // calibration must be within 20° Tilt angle 
+		if(tilt1 > 20) sucess = 0; // calibration must be within 20° Tilt angle
 		if(AdjustmentMode != 0 && ACC_AltitudeControl) if((NeutralAccZ < 682 - 25) || (NeutralAccZ > 682 + 25)) { VersionInfo.HardwareError[0] |= FC_ERROR0_ACC_TOP; sucess = 0;};
 #else
 	NeutralAccZ = (int16_t)GetParamWord(PID_ACC_TOP);
@@ -734,6 +734,104 @@ void ParameterZuordnung(void)
  if(CareFree) { FC_StatusFlags2 |= FC_STATUS2_CAREFREE; /*if(Parameter_AchsKopplung1 < 210) Parameter_AchsKopplung1 += 30;*/} else FC_StatusFlags2 &= ~FC_STATUS2_CAREFREE;
 }
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Calibration required before motors can be armed
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void preFlightCalibration(void)
+{
+  ParamSet_ReadFromEEProm(ActiveParamSet);
+  LipoDetection(0);
+  LIBFC_ReceiverInit(EE_Parameter.Receiver);
+  if ((Parameter_GlobalConfig & CFG_HOEHENREGELUNG))  // Höhenregelung aktiviert?
+  {
+    if ((MessLuftdruck > 950) || (MessLuftdruck < 750))
+      SucheLuftruckOffset();
+  }
+  CalibrationDone = SetNeutral(1);
+  ServoActive = 1;
+  DDRD |= 0x80; // enable J7 -> Servo signal
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+      if(VersionInfo.HardwareError[0]) SpeakHoTT = SPEAK_ERR_SENSOR;
+      else
+      if(!CalibrationDone) SpeakHoTT = SPEAK_ERR_CALIBARTION;
+      else SpeakHoTT = SPEAK_CALIBRATE;
+      ShowSettingNameTime = 5; // for HoTT & Jeti
+#endif
+  Piep(ActiveParamSet, 120);
+}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Calibration with storing acc data in eeprom
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void persistedCalibration(void)
+{
+  MotorenEin = 0;
+  modell_fliegt = 0;
+  CalibrationDone = SetNeutral(2); // store ACC values into EEPROM
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+      if(VersionInfo.HardwareError[0]) SpeakHoTT = SPEAK_ERR_SENSOR;
+      else
+      if(!CalibrationDone) SpeakHoTT = SPEAK_ERR_CALIBARTION;
+      else SpeakHoTT = SPEAK_CALIBRATE;
+#endif
+  Piep(ActiveParamSet, 120);
+}
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Einschalten
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+unsigned char armMotors(void)
+{
+  if (CalibrationDone)
+    FC_StatusFlags |= FC_STATUS_START;
+
+  StartLuftdruck = Luftdruck;
+  HoehenWertF = 0;
+  HoehenWert = 0;
+  SummenHoehe = 0;
+    if (!VersionInfo.HardwareError[0] && CalibrationDone && !NC_ErrorCode)
+    {
+      modell_fliegt = 1;
+      MotorenEin = 1;
+      Mess_Integral_Gier = 0;
+      Mess_Integral_Gier2 = 0;
+      Mess_IntegralNick = EE_Parameter.GyroAccFaktor * (long)Mittelwert_AccNick;
+      Mess_IntegralRoll = EE_Parameter.GyroAccFaktor * (long)Mittelwert_AccRoll;
+      Mess_IntegralNick2 = IntegralNick;
+      Mess_IntegralRoll2 = IntegralRoll;
+      SummeNick = 0;
+      SummeRoll = 0;
+      //									ControlHeading = (((int) EE_Parameter.OrientationAngle * 15 + KompassValue) % 360) / 2;
+      NeueKompassRichtungMerken = 100; // 2 sekunden
+      return 1;
+    }
+    else
+    {
+      beeptime = 1500; // indicate missing calibration
+      return 0;
+    }
+}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Ausschalten
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void unarmMotors(void)
+{
+  SummeNick = 0;
+  SummeRoll = 0;
+  StickNick = 0;
+  StickRoll = 0;
+
+  MotorenEin = 0;
+  modell_fliegt = 0;
+  FC_StatusFlags2 &= ~(FC_STATUS2_WAIT_FOR_TAKEOFF | FC_STATUS2_AUTO_STARTING | FC_STATUS2_AUTO_LANDING);
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+  SpeakHoTT = SPEAK_MK_OFF;
+#endif
+
+}
+
 //############################################################################
 //
 void MotorRegler(void)
@@ -942,30 +1040,13 @@ else SpeakHoTT = SPEAK_RISING;
                          if(abs(PPM_in[EE_Parameter.Kanalbelegung[K_ROLL]]) < 30 && PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] < -70)
                           {
                            WinkelOut.CalcState = 1;
-						   CalibrationDone = 0;
+			   CalibrationDone = 0;
                            beeptime = 1000;
                           }
                           else
                           {
-	                       ParamSet_ReadFromEEProm(ActiveParamSet);
-	                       LipoDetection(0);
-						   LIBFC_ReceiverInit(EE_Parameter.Receiver);
-                           if((Parameter_GlobalConfig & CFG_HOEHENREGELUNG))  // Höhenregelung aktiviert?
-                            {
-                             if((MessLuftdruck > 950) || (MessLuftdruck < 750)) SucheLuftruckOffset();
-                            }
-                           CalibrationDone = SetNeutral(1);
-						   ServoActive = 1;
-						   DDRD  |=0x80; // enable J7 -> Servo signal
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-						   if(VersionInfo.HardwareError[0]) SpeakHoTT = SPEAK_ERR_SENSOR; 
-						   else 
-						   if(!CalibrationDone) SpeakHoTT = SPEAK_ERR_CALIBARTION; 
-						   else SpeakHoTT = SPEAK_CALIBRATE; 
-						   ShowSettingNameTime = 5; // for HoTT & Jeti 
-#endif
-                           Piep(ActiveParamSet,120);
-                         }
+                           preFlightCalibration();
+                          }
                         }
                     }
                  else
@@ -973,17 +1054,8 @@ else SpeakHoTT = SPEAK_RISING;
                     {
                     if(++delay_neutral > 200)  // nicht sofort
                         {
-                        MotorenEin = 0;
-                        delay_neutral = 0;
-                        modell_fliegt = 0;
-                        CalibrationDone = SetNeutral(2); // store ACC values into EEPROM
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-						   if(VersionInfo.HardwareError[0]) SpeakHoTT = SPEAK_ERR_SENSOR; 
-						   else 
-						   if(!CalibrationDone) SpeakHoTT = SPEAK_ERR_CALIBARTION; 
-						   else SpeakHoTT = SPEAK_CALIBRATE; 
-#endif
-                        Piep(ActiveParamSet,120);
+                          delay_neutral = 0;
+                          persistedCalibration();
                         }
                     }
                  else delay_neutral = 0;
@@ -1005,42 +1077,16 @@ else SpeakHoTT = SPEAK_RISING;
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Einschalten
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-							if(CalibrationDone) FC_StatusFlags |= FC_STATUS_START;
-							StartLuftdruck = Luftdruck;
-							HoehenWertF = 0;
-							HoehenWert = 0;
-							SummenHoehe = 0;
-if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter.Kanalbelegung[K_ROLL]]) < 100) && EE_Parameter.MotorSafetySwitch == 0) delay_einschalten = 0;
-							if(++delay_einschalten > 253)
-							{
-								delay_einschalten = 0;
-								if(!VersionInfo.HardwareError[0] && CalibrationDone && !NC_ErrorCode)
-								{
-									modell_fliegt = 1;
-									MotorenEin = 1;
-									sollGier = 0;
-									Mess_Integral_Gier = 0;
-									Mess_Integral_Gier2 = 0;
-									Mess_IntegralNick = EE_Parameter.GyroAccFaktor * (long)Mittelwert_AccNick;
-									Mess_IntegralRoll = EE_Parameter.GyroAccFaktor * (long)Mittelwert_AccRoll;
-									Mess_IntegralNick2 = IntegralNick;
-									Mess_IntegralRoll2 = IntegralRoll;
-									SummeNick = 0;
-									SummeRoll = 0;
-//									ControlHeading = (((int) EE_Parameter.OrientationAngle * 15 + KompassValue) % 360) / 2;
-									NeueKompassRichtungMerken = 100; // 2 sekunden
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-									SpeakHoTT = SPEAK_STARTING; 
-#endif
-								}
-								else
-								{
-									beeptime = 1500; // indicate missing calibration
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-									if(!CalibrationDone) SpeakHoTT = SPEAK_ERR_CALIBARTION; 
-#endif
-								}
-							}
+						  if ((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter.Kanalbelegung[K_ROLL]]) < 100)
+						      && EE_Parameter.MotorSafetySwitch == 0)
+						    delay_einschalten = 0;
+
+						  if (++delay_einschalten > 253) {
+						      delay_einschalten = 0;
+						      if (armMotors()){
+						        sollGier = 0;
+						      }
+						  }
 						}
 						else delay_einschalten = 0;
 					}
@@ -1066,13 +1112,7 @@ if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -100 || abs(PPM_in[EE_Parameter
 							} 
 							if(++delay_ausschalten > 250)  // nicht sofort
 							{
-								MotorenEin = 0;
-								delay_ausschalten = 0;
-								modell_fliegt = 0;
-								FC_StatusFlags2 &= ~(FC_STATUS2_WAIT_FOR_TAKEOFF | FC_STATUS2_AUTO_STARTING | FC_STATUS2_AUTO_LANDING);
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-								SpeakHoTT = SPEAK_MK_OFF; 
-#endif
+							  unarmMotors();
 							}
 						}
 						else delay_ausschalten = 0;

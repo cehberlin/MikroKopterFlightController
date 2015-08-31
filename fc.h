@@ -147,5 +147,11 @@ extern unsigned char Parameter_GlobalConfig;
 extern unsigned char Parameter_ExtraConfig;
 extern signed char MixerTable[MAX_MOTORS][4];
 extern const signed char sintab[31];
+
+extern unsigned char armMotors(void);
+extern void unarmMotors(void);
+extern void preFlightCalibration(void);
+extern void persistedCalibration(void);
+
 #endif //_FC_H
 

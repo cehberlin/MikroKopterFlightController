@@ -4,7 +4,7 @@
 // + Software Nutzungsbedingungen (english version: see below)
 // + der Fa. HiSystems GmbH, Flachsmeerstrasse 2, 26802 Moormerland - nachfolgend Lizenzgeber genannt -
 // + Der Lizenzgeber räumt dem Kunden ein nicht-ausschließliches, zeitlich und räumlich* unbeschränktes Recht ein, die im den
-// + Mikrocontroller verwendete Firmware für die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool 
+// + Mikrocontroller verwendete Firmware für die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool
 // + - nachfolgend Software genannt - nur für private Zwecke zu nutzen.
 // + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulässig.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -15,7 +15,7 @@
 // + Der Kunde trifft angemessene Vorkehrungen für den sicheren Einsatz der Software. Er wird die Software gründlich auf deren
 // + Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
 // + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulässig - begrenzt in Höhe des typischen und vorhersehbaren
-// + Schadens. Die gesetzliche Haftung bei Personenschäden und nach dem Produkthaftungsgesetz bleibt unberührt. Dem Lizenzgeber steht jedoch der Einwand 
+// + Schadens. Die gesetzliche Haftung bei Personenschäden und nach dem Produkthaftungsgesetz bleibt unberührt. Dem Lizenzgeber steht jedoch der Einwand
 // + des Mitverschuldens offen.
 // + Der Kunde trifft angemessene Vorkehrungen für den Fall, dass die Software ganz oder teilweise nicht ordnungsgemäß arbeitet.
 // + Er wird die Software gründlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
@@ -362,6 +362,7 @@ void BearbeiteRxDaten(void)
  if(!NeuerDatensatzEmpfangen) return;
 
 	unsigned char tempchar1, tempchar2;
+	unsigned int beepLength = 0;
 	Decode64(); // dekodiere datenblock im Empfangsbuffer
 	switch(RxdBuffer[1]-'a') // check for Slave Address
 	{
@@ -388,20 +389,24 @@ void BearbeiteRxDaten(void)
 					break;
 
 			case 'm':// "Write Mixer
-                    if(pRxData[0] == EEMIXER_REVISION)
-					{
-                       memcpy(&Mixer, (unsigned char *)pRxData, sizeof(Mixer) - 1);
-                       MixerTable_WriteToEEProm();
-					   tempchar1 = 1;
-					   VersionInfo.HardwareError[1] &= ~FC_ERROR1_MIXER;
-					}
-                    else
-                    {
+                                        if(pRxData[0] == EEMIXER_REVISION)
+                                                            {
+                                           memcpy(&Mixer, (unsigned char *)pRxData, sizeof(Mixer) - 1);
+                                           MixerTable_WriteToEEProm();
+                                                               tempchar1 = 1;
+                                                               VersionInfo.HardwareError[1] &= ~FC_ERROR1_MIXER;
+                                                            }
+                                        else
+                                        {
 						tempchar1 = 0;
 					}
 					while(!UebertragungAbgeschlossen);
 					SendOutData('M', FC_ADDRESS, 1, &tempchar1, sizeof(tempchar1));
 					break;
+			case 'o':// "Execute beep
+                                        memcpy((unsigned char *)&beepLength , (unsigned char *)pRxData, sizeof(beepLength));
+                                        Piep(ActiveParamSet, pRxData[0]);
+			                break;
 
 			case 'p': // get PPM Channels
 					GetPPMChannelAnforderung = 1;
@@ -441,7 +446,21 @@ void BearbeiteRxDaten(void)
 					SendOutData('Q', FC_ADDRESS, 2, &tempchar1, sizeof(tempchar1), (unsigned char *) &EE_Parameter, sizeof(EE_Parameter) - 1);
 					Debug("Lese Setting %d", tempchar1);
 					break;
-
+			case 'r':  //execute calibration
+			                if( pRxData[0] == 1  ){
+                                          preFlightCalibration();
+			                }else if( pRxData[0] == 2 ){
+			                  persistedCalibration();
+			                }
+			                break;
+                        case 'x':  //arm motors
+                                        armMotors();
+                                        Piep(ActiveParamSet, 120);
+                                        break;
+                        case 'e':  //unarm motors
+                                        unarmMotors();
+                                        Piep(ActiveParamSet, 120);
+                                        break;
 			case 's': // Parametersatz speichern
 					if((1 <= pRxData[0]) && (pRxData[0] <= 5) && (pRxData[1] == EEPARAM_REVISION) && MotorenEin == 0) // check for setting to be in range
 					{
