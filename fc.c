@@ -184,13 +184,6 @@ signed int CosAttitude;	// for projection of hoover gas
 unsigned char ACC_AltitudeControl = 0;
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//  return true if external control is activated
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-unsigned char isExternalControlEnabled(void){
-  return (ExternControl.Config & 0x01) && Parameter_ExternalControl > 128;
-}
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //  Debugwerte zuordnen
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void CopyDebugValues(void)
@@ -220,7 +213,7 @@ void CopyDebugValues(void)
     DebugOut.Analog[22] = Capacity.ActualCurrent;
     DebugOut.Analog[23] = Capacity.UsedCapacity;
     DebugOut.Analog[24] = SollHoehe/10;
-    DebugOut.Analog[25] = isExternalControlEnabled(); //current external control state
+    DebugOut.Analog[25] = Parameter_ExternalControl > 128; //current external control state
     // 26 OPEN
     DebugOut.Analog[27] = KompassSollWert;
     DebugOut.Analog[29] = Capacity.MinOfMaxPWM;
@@ -1192,7 +1185,7 @@ else SpeakHoTT = SPEAK_RISING;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //+ Analoge Steuerung per Seriell
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   if(isExternalControlEnabled())
+   if(ExternControl.Config & 0x01 && Parameter_ExternalControl > 128)
     {
 	 StickNick += (int) ExternControl.Nick * (int) EE_Parameter.Stick_P;
 	 StickRoll += (int) ExternControl.Roll * (int) EE_Parameter.Stick_P;

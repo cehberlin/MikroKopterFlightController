@@ -405,7 +405,8 @@ void BearbeiteRxDaten(void)
 					break;
 			case 'o':// "Execute beep
                                         memcpy((unsigned char *)&beepLength , (unsigned char *)pRxData, sizeof(beepLength));
-                                        Piep(ActiveParamSet, pRxData[0]);
+                                        tempchar1 = pRxData[sizeof(beepLength)];
+                                        Piep(tempchar1, beepLength);
 			                break;
 
 			case 'p': // get PPM Channels
