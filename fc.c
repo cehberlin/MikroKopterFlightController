@@ -214,7 +214,7 @@ void CopyDebugValues(void)
     DebugOut.Analog[23] = Capacity.UsedCapacity;
     DebugOut.Analog[24] = SollHoehe/10;
     DebugOut.Analog[25] = Parameter_ExternalControl > 128; //current external control state
-    // 26 OPEN
+    DebugOut.Analog[26] = CalibrationDone;
     DebugOut.Analog[27] = KompassSollWert;
     DebugOut.Analog[29] = Capacity.MinOfMaxPWM;
     DebugOut.Analog[30] = GPS_Nick;
@@ -1526,8 +1526,10 @@ else SpeakHoTT = SPEAK_RISING;
      }
     tmp_int  = (long) EE_Parameter.StickGier_P * ((long)StickGier * abs(StickGier)) / 512L; // expo  y = ax + bx²
     tmp_int += (EE_Parameter.StickGier_P * StickGier) / 4;
-	if(GasIsZeroCnt > 512) tmp_int = 0; // disable Yawing when Gas-Stick is to Zero
-	tmp_int += CompassGierSetpoint;
+    if(GasIsZeroCnt > 512 && !(ExternControl.Config & 0x01 && Parameter_ExternalControl > 128)){
+      tmp_int = 0; // disable Yawing when Gas-Stick is to Zero and we are not under external control
+    }
+    tmp_int += CompassGierSetpoint;
     sollGier = tmp_int;
     Mess_Integral_Gier -= tmp_int;
     if(Mess_Integral_Gier > 50000) Mess_Integral_Gier = 50000;  // begrenzen
