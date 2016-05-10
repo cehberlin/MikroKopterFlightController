@@ -11,3 +11,4 @@ This special version includes adjustments for
 * Integrated new UART commands:
 ** remote arming('x')/disarming('e')
 ** triggering the calibration ('r' with payload 1 for preflight calibration and 2 for persisted calibration to EEPROM)
+** beep sound ('o' with beep length (int16) as payload)
