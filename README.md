@@ -8,3 +8,6 @@ This special version includes adjustments for
 * Proper compilation in Linux Environment (tested on Ubuntu 14.04)
 * Disabled time limited subscription of debug stream (Can be enabled and disabled)
 * Disabled minimum thrust/throttle selection on external control instead thrust/throttle are set directly
+* Integrated new UART commands:
+** remote arming('x')/disarming('e')
+** triggering the calibration ('r' with payload 1 for preflight calibration and 2 for persisted calibration to EEPROM)
