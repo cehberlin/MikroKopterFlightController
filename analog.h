@@ -25,12 +25,18 @@ extern volatile long StartLuftdruck;
 extern volatile char MessanzahlNick;
 extern unsigned char AnalogOffsetNick,AnalogOffsetRoll,AnalogOffsetGier;
 extern volatile unsigned char AdReady;
-volatile long HoehenWertF;
-
+extern unsigned int BaroStep;
+extern long HoehenWertF;
+extern long HoehenWert_Mess;
+extern long HoehenWertF_Mess;
 unsigned int ReadADC(unsigned char adc_input);
 void         ADC_Init(void);
 void SucheLuftruckOffset(void);
-void SucheGyroOffset(void);
+//void SucheGyroOffset(void);
+void CalcExpandBaroStep(void);
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+extern unsigned char CalAthmospheare;
+#endif
 
 #define AD_GIER     0
 #define AD_ROLL     1
@@ -38,9 +44,14 @@ void SucheGyroOffset(void);
 #define AD_DRUCK    3
 #define AD_UBAT     4
 #define AD_ACC_Z    5
+
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+extern unsigned char AD_ACC_Y;
+extern unsigned char AD_ACC_X;
+#else
 #define AD_ACC_Y    6
 #define AD_ACC_X    7
-
+#endif
 
 #define ANALOG_OFF ADCSRA=0
 

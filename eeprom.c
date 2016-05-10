@@ -51,7 +51,6 @@
 // + Note: For information on license extensions (e.g. commercial use), please contact us at info(@)hisystems.de.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
 #ifndef EEMEM
 #define EEMEM __attribute__ ((section (".eeprom")))
 #endif
@@ -119,7 +118,7 @@ void CommonDefaults(void)
 {
 	EE_Parameter.Revision = EEPARAM_REVISION;
 	memset(EE_Parameter.Name,0,12); // delete name
-	if(PlatinenVersion >= 20)
+//	if(PlatinenVersion >= 20)
 	{
 		EE_Parameter.Gyro_D = 10;
 		EE_Parameter.Driftkomp = 0;
@@ -127,7 +126,7 @@ void CommonDefaults(void)
 		EE_Parameter.WinkelUmschlagNick = 78;
 		EE_Parameter.WinkelUmschlagRoll = 78;
 	}
-	else
+/*	else
 	{
 		EE_Parameter.Gyro_D = 3;
 		EE_Parameter.Driftkomp = 32;
@@ -135,11 +134,18 @@ void CommonDefaults(void)
 		EE_Parameter.WinkelUmschlagNick = 85;
 		EE_Parameter.WinkelUmschlagRoll = 85;
 	}
+*/
 	EE_Parameter.GyroAccAbgleich = 32;        // 1/k
 	EE_Parameter.BitConfig = 0;              // Looping usw.
 	EE_Parameter.GlobalConfig = CFG_ACHSENKOPPLUNG_AKTIV | CFG_KOMPASS_AKTIV | CFG_GPS_AKTIV | CFG_HOEHEN_SCHALTER;
-	EE_Parameter.ExtraConfig = CFG_GPS_AID | CFG2_VARIO_BEEP | CFG_LEARNABLE_CAREFREE;
+	EE_Parameter.ExtraConfig = CFG_GPS_AID | CFG2_VARIO_BEEP | CFG_LEARNABLE_CAREFREE | CFG_NO_RCOFF_BEEPING;
+	EE_Parameter.GlobalConfig3 = CFG3_SPEAK_ALL | CFG3_NO_GPSFIX_NO_START;//
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 	EE_Parameter.Receiver = RECEIVER_HOTT;
+#else
+	EE_Parameter.Receiver = RECEIVER_JETI;
+#endif
+
 	EE_Parameter.MotorSafetySwitch = 0; 
 	EE_Parameter.ExternalControl = 0;
 
@@ -147,8 +153,10 @@ void CommonDefaults(void)
 	EE_Parameter.Gas_Max = 230;           // Wert : 33-247
 	EE_Parameter.KompassWirkung = 64;    // Wert : 0-247
 
-	EE_Parameter.Hoehe_MinGas = 30;
 	EE_Parameter.HoeheChannel = 5;         // Wert : 0-32
+	EE_Parameter.Hoehe_MinGas = 30;
+	EE_Parameter.Hoehe_TiltCompensation = 110; // in %
+
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 	if(ACC_AltitudeControl)
 	{
@@ -156,10 +164,8 @@ void CommonDefaults(void)
 		EE_Parameter.Luftdruck_D  = 40;          // Wert : 0-247
 		EE_Parameter.Hoehe_ACC_Wirkung = 30;     // Wert : 0-247
 		EE_Parameter.Hoehe_HoverBand = 1;     	  // Wert : 0-247
-		EE_Parameter.Hoehe_GPS_Z = 0;           // Wert : 0-247
 		EE_Parameter.Hoehe_StickNeutralPoint = 127;// Wert : 0-247 (0 = Hover-Estimation)
-		EE_Parameter.GlobalConfig3 = CFG3_SPEAK_ALL;//
-		EE_Parameter.FailSafeTime = 30; 	          // 0 = off
+		EE_Parameter.FailSafeTime = 60; 	          // 0 = off
 	}
 	else 
 #endif
@@ -168,9 +174,7 @@ void CommonDefaults(void)
 		EE_Parameter.Luftdruck_D  = 30;          // Wert : 0-247
 		EE_Parameter.Hoehe_ACC_Wirkung = 0;     // Wert : 0-247
 		EE_Parameter.Hoehe_HoverBand = 8;     	  // Wert : 0-247
-		EE_Parameter.Hoehe_GPS_Z = 20;           // Wert : 0-247
 		EE_Parameter.Hoehe_StickNeutralPoint = 0;// Wert : 0-247 (0 = Hover-Estimation)
-	    EE_Parameter.GlobalConfig3 = CFG3_SPEAK_ALL; 
 		EE_Parameter.FailSafeTime = 0; 	          // 0 = off
 	}
 	
@@ -192,7 +196,7 @@ void CommonDefaults(void)
 	EE_Parameter.ServoCompInvert = 2;        // Wert : 0-247     // Richtung Einfluss Gyro/Servo
 	EE_Parameter.ServoNickMin = 24;          // Wert : 0-247     // Anschlag
 	EE_Parameter.ServoNickMax = 230;         // Wert : 0-247     // Anschlag
-	EE_Parameter.ServoNickRefresh = 4;
+	EE_Parameter.ServoNickRefresh = 3;
 	EE_Parameter.Servo3 = 125;
 	EE_Parameter.Servo4 = 125;
 	EE_Parameter.Servo5 = 125;
@@ -203,15 +207,18 @@ void CommonDefaults(void)
 	EE_Parameter.ServoManualControlSpeed = 60;
 	EE_Parameter.CamOrientation = 0;         // Wert : 0-24 -> 0-360 -> 15° steps
 
-	EE_Parameter.J16Bitmask = 95;
-	EE_Parameter.J17Bitmask = 243;
-	EE_Parameter.WARN_J16_Bitmask = 0xAA;
+	EE_Parameter.J16Bitmask = 0xAA;
+	EE_Parameter.J17Bitmask = 0xCC;
+	EE_Parameter.WARN_J16_Bitmask = 0x00;
 	EE_Parameter.WARN_J17_Bitmask = 0xAA;
 	EE_Parameter.J16Timing = 40;
 	EE_Parameter.J17Timing = 40;
-    EE_Parameter.NaviOut1Parameter = 0;       // Photo release in meter
+    EE_Parameter.AutoPhotoDistance = 0;    	// Photo release in meter
+    EE_Parameter.AutoPhotoAtitudes = 0;   	// Photo release in meter
+	EE_Parameter.SingleWpSpeed = 50;       	// Speed when flying the single points
+
 	EE_Parameter.LoopGasLimit = 50;
-	EE_Parameter.LoopThreshold = 90;         // Wert: 0-247  Schwelle für Stickausschlag
+	EE_Parameter.LoopThreshold = 90;     	// Wert: 0-247  Schwelle für Stickausschlag
 	EE_Parameter.LoopHysterese = 50;
 
 	EE_Parameter.NaviGpsModeChannel = 6; // Kanal 6
@@ -227,12 +234,12 @@ void CommonDefaults(void)
 	EE_Parameter.NaviStickThreshold = 8;
 	EE_Parameter.NaviWindCorrection = 50;
 	EE_Parameter.NaviAccCompensation = 42;
-	EE_Parameter.NaviOperatingRadius = 245;
+	EE_Parameter.NaviMaxFlyingRange = 0;
+	EE_Parameter.NaviDescendRange = 0;
 	EE_Parameter.NaviAngleLimitation = 140;
 	EE_Parameter.NaviPH_LoginTime = 2;
 	EE_Parameter.OrientationAngle = 0;
 	EE_Parameter.CareFreeChannel = 0;
-	EE_Parameter.UnterspannungsWarnung = 33; // Wert : 0-247 ( Automatische Zellenerkennung bei < 50)
 	EE_Parameter.NotGas = 65;                // Wert : 0-247     // Gaswert bei Empangsverlust (ggf. in Prozent)
 	EE_Parameter.NotGasZeit = 90;            // Wert : 0-247     // Zeit bis auf NotGas geschaltet wird, wg. Rx-Problemen
 	EE_Parameter.MotorSmooth = 0;           
@@ -243,6 +250,23 @@ void CommonDefaults(void)
 	EE_Parameter.FailsafeChannel = 0;
 	EE_Parameter.ServoFilterNick = 0;
 	EE_Parameter.ServoFilterRoll = 0;
+    EE_Parameter.Servo3OnValue = 140;
+    EE_Parameter.Servo3OffValue = 70;
+	EE_Parameter.Servo4OnValue = 140;
+    EE_Parameter.Servo4OffValue = 70;
+    EE_Parameter.ServoFS_Pos[0] = 0;
+    EE_Parameter.ServoFS_Pos[1] = 0;
+    EE_Parameter.ServoFS_Pos[2] = 0;
+    EE_Parameter.ServoFS_Pos[3] = 0;
+    EE_Parameter.ServoFS_Pos[4] = 0;
+	EE_Parameter.CompassOffset = 0;
+	EE_Parameter.UnterspannungsWarnung 	= 32; // Wert : 0-247 ( Automatische Zellenerkennung bei < 50)
+	EE_Parameter.ComingHomeVoltage 		= 31;
+	EE_Parameter.AutoLandingVoltage 	= 30;
+	EE_Parameter.LandingPulse = 960 / 4;
+	EE_Parameter.SingleWpControlChannel = 0;
+	EE_Parameter.MenuKeyChannel = 0;
+	
 }
 /*
 void ParamSet_DefaultSet1(void) // sport
@@ -295,12 +319,12 @@ void ParamSet_DefaultSet2(void) // Agil
 	CommonDefaults();
 	EE_Parameter.Stick_P = 8;                // Wert : 1-20
 	EE_Parameter.Stick_D = 16;               // Wert : 0-20
-	EE_Parameter.StickGier_P  = 6;                // Wert : 1-20
+	EE_Parameter.StickGier_P  = 6;           // Wert : 1-20
 	EE_Parameter.Gyro_P = 100;               // Wert : 0-247
 	EE_Parameter.Gyro_I = 120;               // Wert : 0-247
 	EE_Parameter.Gyro_Gier_P = 100;          // Wert : 0-247
 	EE_Parameter.Gyro_Gier_I = 120;          // Wert : 0-247
-	EE_Parameter.Gyro_Stability = 6; 	  	  // Wert : 1-8
+	EE_Parameter.Gyro_Stability = 6; 	  	 // Wert : 1-8
 	EE_Parameter.I_Faktor = 16;
 	EE_Parameter.CouplingYawCorrection = 70;
 	EE_Parameter.DynamicStability = 70;
@@ -392,6 +416,7 @@ uint8_t ParamSet_ReadFromEEProm(uint8_t setnumber)
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 	LIBFC_HoTT_Clear();
 #endif
+	if(EE_Parameter.LandingPulse < 760 / 4) EE_Parameter.LandingPulse = 0;
 	return 1;
 }
 
@@ -575,10 +600,11 @@ void ParamSet_Init(void)
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 	if(PlatinenVersion != GetParamByte(PID_HARDWARE_VERSION)) 
 	 {
+	  J4High;  // switch pullup high
+	  printf("\n\r--> Hardware Version Byte Changed <--");
 	  if(PlatinenVersion == 22 && GetParamByte(PID_HARDWARE_VERSION) == 21 && !(PIND & 0x10)) SetParamByte(PID_EE_REVISION,0); // reset the Settings if the Version changed to V2.2
 	  SetParamByte(PID_HARDWARE_VERSION,PlatinenVersion); // Remember the Version number
 	  wdt_enable(WDTO_15MS); // Reset-Commando
-	  printf("\n\r--> Hardware Version Byte Changed <--");
 	  while(1);
 	 } 
 #endif
@@ -642,11 +668,18 @@ void ParamSet_Init(void)
 	if(ee_default)	SetParamByte(PID_EE_REVISION, (EEPARAM_REVISION));
 	// determine motornumber
 	RequiredMotors = 0;
-	for(i = 0; i < 16; i++)
+	for(i = 0; i < MAX_MOTORS; i++)
 	{
 		if(Mixer.Motor[i][MIX_GAS] > 0) RequiredMotors++;
+		else 
+		{ 
+		 Mixer.Motor[i][MIX_GAS] = 0;
+		 Mixer.Motor[i][MIX_NICK] = 0;
+		 Mixer.Motor[i][MIX_ROLL] = 0;
+		 Mixer.Motor[i][MIX_YAW] = 0;
+		} 
+//printf("\n\r%2i:%i:%i:%i:%i",i,Mixer.Motor[i][0],Mixer.Motor[i][1],Mixer.Motor[i][2],Mixer.Motor[i][3]);
 	}
-
 	printf("\n\rMixer-Config: '%s' (%u Motors)",Mixer.Name, RequiredMotors);
  PrintLine();// ("\n\r===================================");
 

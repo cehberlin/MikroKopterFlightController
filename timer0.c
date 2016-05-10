@@ -59,7 +59,7 @@ volatile unsigned int tim_main;
 volatile unsigned char UpdateMotor = 0;
 volatile unsigned int cntKompass = 0;
 volatile unsigned int beeptime = 0;
-volatile unsigned char SendSPI = 0, ServoActive = 0, CalculateServoSignals = 1;
+volatile unsigned char BytegapSPI = 0, ServoActive = 0, CalculateServoSignals = 1;
 unsigned char JustMK3MagConnected = 0;
 uint16_t RemainingPulse = 0;
 volatile int16_t ServoNickOffset = (255 / 2) * MULTIPLYER * 16; // initial value near center positon
@@ -88,7 +88,7 @@ ISR(TIMER0_OVF_vect)    // 9,7kHz
 {
    static unsigned char cnt_1ms = 1,cnt = 0;
    unsigned char pieper_ein = 0;
-   if(SendSPI) SendSPI--;
+   if(BytegapSPI) BytegapSPI--;
    if(SpektrumTimer) SpektrumTimer--;
    if(!cnt--)
     {
@@ -97,7 +97,7 @@ ISR(TIMER0_OVF_vect)    // 9,7kHz
      cnt_1ms++;
      cnt_1ms %= 2;
 
-     if(!cnt_1ms) UpdateMotor = 1;
+     if(!cnt_1ms) if(UpdateMotor < 4) UpdateMotor++;
 	 if(!(PINC & 0x10)) JustMK3MagConnected = 1;
 
      if(beeptime)
@@ -120,13 +120,15 @@ ISR(TIMER0_OVF_vect)    // 9,7kHz
 #else
      if(pieper_ein)
         {
-          if(PlatinenVersion == 10) PORTD |= (1<<2); // Speaker an PORTD.2
-          else                      PORTC |= (1<<7); // Speaker an PORTC.7
+//          if(PlatinenVersion == 10) PORTD |= (1<<2); // Speaker an PORTD.2
+//          else                      
+		  PORTC |= (1<<7); // Speaker an PORTC.7
         }
      else
         {
-         if(PlatinenVersion == 10) PORTD &= ~(1<<2);
-         else                      PORTC &= ~(1<<7);
+//         if(PlatinenVersion == 10) PORTD &= ~(1<<2);
+//         else                      
+		 PORTC &= ~(1<<7);
         }
 #endif
 	}
@@ -142,7 +144,6 @@ ISR(TIMER0_OVF_vect)    // 9,7kHz
     {
      cntKompass += cntKompass / 41;
      if(cntKompass > 10) KompassValue = cntKompass - 10; else KompassValue = 0;
-//     KompassRichtung = ((540 + KompassValue - KompassSollWert) % 360) - 180;
     }
     cntKompass = 0;
    }
@@ -235,9 +236,10 @@ void Timer_Init(void)
 {
     tim_main = SetDelay(10);
     TCCR0B = CK8;
-    TCCR0A = (1<<COM0A1)|(1<<COM0B1)|3;//fast PWM
-    OCR0A =  0;
-    OCR0B = 180;
+//    TCCR0A = (1<<COM0A1)|(1<<COM0B1)|3;//fast PWM
+    TCCR0A = (1<<COM0A1)|(1<<COM0B1)|(1<<COM0B0)|3;//fast PWM
+    OCR0B =  255;
+    OCR0A = 180;
     TCNT0 = (unsigned char)-TIMER_RELOAD_VALUE;  // reload
     //OCR1  = 0x00;
     TIMSK0 |= _BV(TOIE0);
@@ -269,9 +271,11 @@ void CalculateServo(void)
 	cosinus = sintab[EE_Parameter.CamOrientation + 6];
 	sinus = sintab[EE_Parameter.CamOrientation];
 
+
   if(CalculateServoSignals == 1)
    {
-		nick = (cosinus * IntegralNick) / 128L - (sinus * IntegralRoll) / 128L;
+	    if(EE_Parameter.GlobalConfig3 & CFG3_SERVO_NICK_COMP_OFF) nick = 0;
+	    else nick = (cosinus * IntegralNick) / 128L - (sinus * IntegralRoll) / 128L;
         nick -= POI_KameraNick * 7;
 		nick = ((long)Parameter_ServoNickComp * nick) / 512L;
 		// offset (Range from 0 to 255 * 3 = 765)
@@ -298,11 +302,13 @@ void CalculateServo(void)
 		{
 			ServoNickValue = (int16_t)EE_Parameter.ServoNickMax * MULTIPLYER;
 		}
-		if(PlatinenVersion < 20) CalculateServoSignals = 0; else CalculateServoSignals++;
+//		if(PlatinenVersion < 20) CalculateServoSignals = 0; else 
+		CalculateServoSignals++;
 	}
 	else
 	{
-    	roll = (cosinus * IntegralRoll) / 128L + (sinus * IntegralNick) / 128L;
+	    if(EE_Parameter.GlobalConfig3 & CFG3_SERVO_NICK_COMP_OFF) roll = 0;
+    	else roll = (cosinus * IntegralRoll) / 128L + (sinus * IntegralNick) / 128L;
     	roll = ((long)Parameter_ServoRollComp * roll) / 512L;
 		ServoRollOffset += ((int16_t)Parameter_ServoRollControl * (MULTIPLYER*16) - ServoRollOffset) / EE_Parameter.ServoManualControlSpeed;
 		if(EE_Parameter.ServoCompInvert & SERVO_ROLL_INV)
@@ -348,7 +354,7 @@ ISR(TIMER2_COMPA_vect)
 	static uint16_t ServoFrameTime = 0;
 	static uint8_t  ServoIndex = 0;
 
-
+/*
 	if(PlatinenVersion < 20)
 	{
 		//---------------------------
@@ -378,6 +384,7 @@ ISR(TIMER2_COMPA_vect)
 		}
 	} // EOF Nick servo state machine
 	else
+*/
 	{
 		//-----------------------------------------------------
 		// PPM state machine, onboard demultiplexed by HEF4017
@@ -401,13 +408,15 @@ ISR(TIMER2_COMPA_vect)
 				else
 				{
 					RemainingPulse  = MINSERVOPULSE + SERVORANGE/2; // center position ~ 1.5ms
+					if(ServoFailsafeActive && ServoIndex < 6 && EE_Parameter.ServoFS_Pos[ServoIndex-1]) RemainingPulse += ((int16_t)EE_Parameter.ServoFS_Pos[ServoIndex-1] * MULTIPLYER) - (256 / 2) * MULTIPLYER;
+					else 
 					switch(ServoIndex) // map servo channels
 					{
 					 case 1: // Nick Compensation Servo
-							RemainingPulse += ServoNickValue - (256 / 2) * MULTIPLYER; // shift ServoNickValue to center position
+							RemainingPulse += ServoNickValue - (256 / 2) * MULTIPLYER;
 							break;
  					 case 2: // Roll Compensation Servo
-							RemainingPulse += ServoRollValue - (256 / 2) * MULTIPLYER; // shift ServoNickValue to center position
+							RemainingPulse += ServoRollValue - (256 / 2) * MULTIPLYER;
 							break;
 					 case 3:
 					 		RemainingPulse += ((int16_t)Parameter_Servo3 * MULTIPLYER) - (256 / 2) * MULTIPLYER;
@@ -418,7 +427,7 @@ ISR(TIMER2_COMPA_vect)
 					 case 5:
 					 		RemainingPulse += ((int16_t)Parameter_Servo5 * MULTIPLYER) - (256 / 2) * MULTIPLYER;
 							break;
-						default: // other servo channels
+					default: // other servo channels
 							RemainingPulse += 2 * PPM_in[ServoIndex]; // add channel value, factor of 2 because timer 1 increments 3.2µs
 							break;
 					}
@@ -438,7 +447,7 @@ ISR(TIMER2_COMPA_vect)
 				RemainingPulse = PPM_STOPPULSE;
 				// accumulate time for correct sync gap
 				ServoFrameTime += RemainingPulse;
-				if((ServoActive && SenderOkay) || ServoActive == 2) HEF4017Reset_OFF; // disable HEF4017 reset
+				if((ServoActive/* && SenderOkay*/) || ServoActive == 2) HEF4017Reset_OFF; // disable HEF4017 reset
 				else HEF4017Reset_ON;
 				ServoIndex++; 
 				if(ServoIndex > EE_Parameter.ServoNickRefresh+1)

@@ -60,12 +60,14 @@
 #include "analog.h"
 #include "uart.h"
 #include "timer0.h"
+#include "main.h"
 
-volatile uint8_t twi_state	= TWI_STATE_MOTOR_TX;
+volatile uint8_t twi_state	= TWI_STATE_MOTOR_TX, ReadBlSize = 9;
 volatile uint8_t dac_channel 	= 0;
 volatile uint8_t motor_write 	= 0;
 volatile uint8_t motor_read  	= 0;
 volatile uint8_t I2C_TransferActive = 0;
+uint8_t Max_I2C_Packets = 12;
 
 volatile uint16_t I2CTimeout = 100;
 
@@ -74,6 +76,7 @@ uint8_t MissingMotor  = 0;
 volatile uint8_t BLFlags = 0;
 
 MotorData_t Motor[MAX_MOTORS];
+RedundantBl_t RedundantMotor[MAX_MOTORS];
 
 // bit mask for witch BL the configuration should be sent
 volatile uint16_t BLConfig_WriteMask = 0;
@@ -120,14 +123,21 @@ void I2C_Init(char clear)
 
 	if(clear) for(i=0; i < MAX_MOTORS; i++)
 	{
-		Motor[i].Version	= 0;
-		Motor[i].SetPoint	= 0;
+		Motor[i].Version		= 0;
+		Motor[i].SetPoint		= 0;
 		Motor[i].SetPointLowerBits	= 0;
-		Motor[i].State		= 0;
-		Motor[i].ReadMode	= BL_READMODE_STATUS;
-		Motor[i].Current	= 0;
-		Motor[i].MaxPWM		= 0;
-		Motor[i].Temperature = 0;
+		Motor[i].State			= 0;
+		Motor[i].ReadMode		= BL_READMODE_STATUS;
+		Motor[i].Current		= 0;
+		Motor[i].MaxPWM			= 0;
+		Motor[i].Temperature 	= 0;
+		Motor[i].NotReadyCnt 	= 0;
+        Motor[i].RPM			= 0;
+        Motor[i].reserved1 		= 0;
+        Motor[i].Voltage 		= 0;
+        Motor[i].SlaveI2cError 	= 0;
+        Motor[i].VersionMajor 	= 0;
+        Motor[i].VersionMinor 	= 0;
 	}
     sei();
 	SREG = sreg;
@@ -157,7 +167,7 @@ ISR (TWI_vect)
 	static uint8_t missing_motor = 0, motor_read_temperature = 0;
 	static uint8_t *pBuff = 0;
 	static uint8_t BuffLen = 0;
-
+	static uint8_t max_packets = 0;
     switch (twi_state++)
 	{
 		// Master Transmit
@@ -165,10 +175,12 @@ ISR (TWI_vect)
             I2C_TransferActive = 1;
 			// skip motor if not used in mixer
 			while((Mixer.Motor[motor_write][MIX_GAS] <= 0) && (motor_write < MAX_MOTORS)) motor_write++;
-			if(motor_write >= MAX_MOTORS) // writing finished, read now
+			motor_write %= MAX_MOTORS;
+			if(++max_packets > Max_I2C_Packets) // writing finished, read now
 			{
+				max_packets = 0;
 				BLConfig_WriteMask = 0; // reset configuration bitmask
-				motor_write = 0; // reset motor write counter for next cycle
+//motor_write = 0; // reset motor write counter for next cycle
 				twi_state = TWI_STATE_MOTOR_RX;
 				I2C_WriteByte(TWI_BASE_ADDRESS + TW_READ + (motor_read<<1) ); // select slave address in rx mode
 			}
@@ -255,11 +267,11 @@ ISR (TWI_vect)
 						case BL_READMODE_CONFIG:
 							pBuff = (uint8_t*)&BLConfig;
 							BuffLen = sizeof(BLConfig_t);
+							Motor[motor_read].ReadMode = BL_READMODE_STATUS; // only once
 							break;
-
 						case BL_READMODE_STATUS:
 							pBuff = (uint8_t*)&(Motor[motor_read].Current);
-							if(motor_read == motor_read_temperature) BuffLen = 3; // read Current, MaxPwm & Temp
+							if(motor_read == motor_read_temperature) BuffLen = ReadBlSize; // read Current, MaxPwm & Temp (is 3 or 9)
 							else BuffLen = 1;// read Current only
 							break;
 					}
@@ -284,7 +296,7 @@ ISR (TWI_vect)
 			break;
 		case 6: // receive bytes
 			*pBuff = TWDR;
-			pBuff++;
+			pBuff++; // set Pointer to next element : Motor[].Current,Motor[].Temperature
 			BuffLen--;
 			if(BuffLen>1)
 			{
@@ -294,13 +306,34 @@ ISR (TWI_vect)
 			{
 				I2C_ReceiveLastByte(); 	// read last byte
 			}
-			else // nothing left
+			else // nothing left -> ready
 			{
 				if(BLFlags & BLFLAG_READ_VERSION)
 				{
-					if(!(FC_StatusFlags & FC_STATUS_MOTOR_RUN) && (Motor[motor_read].MaxPWM == 250) ) Motor[motor_read].Version |= MOTOR_STATE_NEW_PROTOCOL_MASK;
-					else Motor[motor_read].Version = 0;
+					if(!(FC_StatusFlags & FC_STATUS_MOTOR_RUN))
+                     { 
+					   if((Motor[motor_read].MaxPWM & 252) == 248) Motor[motor_read].Version |= MOTOR_STATE_NEW_PROTOCOL_MASK;
+				 	   else Motor[motor_read].Version = 0;
+                       if(Motor[motor_read].MaxPWM == 248) Motor[motor_read].Version |= (MOTOR_STATE_FAST_MODE | MOTOR_STATE_BL30);
+					   else
+                       if(Motor[motor_read].MaxPWM == 249) Motor[motor_read].Version |= MOTOR_STATE_BL30;
+					 }  
 				}
+
+                if(FC_StatusFlags & FC_STATUS_FLY)
+					   {
+				        // Starting -> 40
+					    // I2C-Setpoint is zero -> 250
+					    // 255 -> Running and no Redundancy
+						// 254 -> Running and active Redundancy
+					    if(Motor[motor_read].MaxPWM < 254) 
+						 {
+						  Motor[motor_read].NotReadyCnt++;
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+						  SpeakHoTT = SPEAK_ERR_MOTOR;
+#endif
+						 } 
+					   }
 				if(++motor_read >= MAX_MOTORS)
 				{
 					motor_read = 0;			// restart from beginning
@@ -318,7 +351,7 @@ ISR (TWI_vect)
 			}
 			twi_state = 6; // if there are some bytes left
 			break;
-
+/*
 		// writing Gyro-Offsets
 		case 18:
 			I2C_WriteByte(0x98); // Address the DAC
@@ -363,6 +396,7 @@ ISR (TWI_vect)
 				BLFlags |= BLFLAG_TX_COMPLETE;
 			}
 			break;
+*/
         default:
 			I2C_Stop(TWI_STATE_MOTOR_TX);
 			BLFlags |= BLFLAG_TX_COMPLETE;
@@ -378,9 +412,8 @@ ISR (TWI_vect)
 
 uint8_t I2C_WriteBLConfig(uint8_t motor)
 {
-	uint8_t i;
+	uint8_t i, packets;
 	uint16_t timer;
-
 	if(MotorenEin || PC_MotortestActive) return(BLCONFIG_ERR_MOTOR_RUNNING); 	// not when motors are running!
 	if(motor > MAX_MOTORS) return (BLCONFIG_ERR_MOTOR_NOT_EXIST); 			// motor does not exist!
 	if(motor)
@@ -389,38 +422,31 @@ uint8_t I2C_WriteBLConfig(uint8_t motor)
 		if(!(Motor[motor-1].Version & MOTOR_STATE_NEW_PROTOCOL_MASK)) return(BLCONFIG_ERR_HW_NOT_COMPATIBLE); // not a new BL!
 	}
 	// check BL configuration to send
-	if(BLConfig.Revision != BLCONFIG_REVISION) return (BLCONFIG_ERR_SW_NOT_COMPATIBLE); // bad revison
+	if((BLConfig.Revision & 0x0B) != BLCONFIG_REVISION) return (BLCONFIG_ERR_SW_NOT_COMPATIBLE); // bad revison
 	i = RAM_Checksum((uint8_t*)&BLConfig, sizeof(BLConfig_t) - 1);
 	if(i != BLConfig.crc) return(BLCONFIG_ERR_CHECKSUM); // bad checksum
 
-	timer = SetDelay(2000);
+    packets = Max_I2C_Packets;
+	Max_I2C_Packets = MAX_MOTORS;
+	I2CTimeout = 100;
+
+	timer = SetDelay(100);
 	while(!(BLFlags & BLFLAG_TX_COMPLETE) && !CheckDelay(timer)); 	//wait for complete transfer
 
 	// prepare the bitmask
-	if(!motor) // 0 means all
-	{
-		BLConfig_WriteMask = 0xFF; // all motors at once with the same configuration
-	}
-	else //only one specific motor
-	{
-		BLConfig_WriteMask = 0x0001<<(motor-1);
-	}
-	for(i = 0; i < MAX_MOTORS; i++)
-	{
-		if((0x0001<<i) & BLConfig_WriteMask)
-		{
-			Motor[i].SetPoint = 0;
-			Motor[i].SetPointLowerBits = 0;
-		}
-	}
+	if(!motor) BLConfig_WriteMask = 0x0FFF; 		// 0 means all -> all motors at once with the same configuration
+	else BLConfig_WriteMask = 0x0001<<(motor-1);  	//only one specific motor
 
 	motor_write = 0;
+	motor_read 	= 0;
 	// needs at least MAX_MOTORS loops of 2 ms (12*2ms = 24ms)
+	timer = SetDelay(1000);
 	do
 	{
 		I2C_Start(TWI_STATE_MOTOR_TX); // start an i2c transmission
 		while(!(BLFlags & BLFLAG_TX_COMPLETE)  && !CheckDelay(timer)); //wait for complete transfer
-	}while(BLConfig_WriteMask  && !CheckDelay(timer)); // repeat until the BL config has been sent
+	} while(BLConfig_WriteMask  && !CheckDelay(timer)); // repeat until the BL config has been sent
+    Max_I2C_Packets = packets;
 	if(BLConfig_WriteMask) return(BLCONFIG_ERR_MOTOR_NOT_EXIST);
 	return(BLCONFIG_SUCCESS);
 }
@@ -436,22 +462,14 @@ uint8_t I2C_ReadBLConfig(uint8_t motor)
 	if(!(Motor[motor-1].State & MOTOR_STATE_PRESENT_MASK)) return(BLCONFIG_ERR_MOTOR_NOT_EXIST); // motor does not exist!
 	if(!(Motor[motor-1].Version & MOTOR_STATE_NEW_PROTOCOL_MASK)) return(BLCONFIG_ERR_HW_NOT_COMPATIBLE); // not a new BL!
 
-	timer = SetDelay(2000);
+	timer = SetDelay(1000);
 	while(!(BLFlags & BLFLAG_TX_COMPLETE) && !CheckDelay(timer)); 				//wait for complete transfer
 
 	// prepare the bitmask
 	BLConfig_ReadMask = 0x0001<<(motor-1);
 
-	for(i = 0; i < MAX_MOTORS; i++)
-	{
-		if((0x0001<<i) & BLConfig_ReadMask)
-		{
-			Motor[i].SetPoint = 0;
-			Motor[i].SetPointLowerBits = 0;
-		}
-	}
-
-	motor_read = 0;
+	motor_write = 0;
+	motor_read 	= 0;
 	BLConfig.Revision = 0; // bad revision
 	BLConfig.crc = 0;	   // bad checksum
 	// needs at least MAX_MOTORS loops of 2 ms (12*2ms = 24ms)
@@ -459,9 +477,9 @@ uint8_t I2C_ReadBLConfig(uint8_t motor)
 	{
 		I2C_Start(TWI_STATE_MOTOR_TX); // start an i2c transmission
 		while(!(BLFlags & BLFLAG_TX_COMPLETE) && !CheckDelay(timer)); //wait for complete transfer
-	}while(BLConfig_ReadMask && !CheckDelay(timer)); // repeat until the BL config has been received from all motors
+	} while(BLConfig_ReadMask && !CheckDelay(timer)); // repeat until the BL config has been received from all motors
 	// validate result
-	if(BLConfig.Revision != BLCONFIG_REVISION) return (BLCONFIG_ERR_SW_NOT_COMPATIBLE); // bad revison
+	if((BLConfig.Revision & 0x0B) != BLCONFIG_REVISION) return (BLCONFIG_ERR_SW_NOT_COMPATIBLE); // bad revison
 	i = RAM_Checksum((uint8_t*)&BLConfig, sizeof(BLConfig_t) - 1);
 	if(i != BLConfig.crc) return(BLCONFIG_ERR_CHECKSUM); // bad checksum
 	return(BLCONFIG_SUCCESS);

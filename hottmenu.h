@@ -1,6 +1,11 @@
 #ifndef _HOTTMENU_H
 #define _HOTTMENU_H
 
+extern unsigned char NaviData_WaypointIndex;
+extern unsigned char NaviData_WaypointNumber, NaviData_TargetHoldTime,ToNC_Load_WP_List,NaviData_MaxWpListIndex;
+extern unsigned char ToNC_Load_SingePoint, ToNC_Store_SingePoint, Show_Load_Time, Show_Store_Time, Show_Load_Value, Show_Store_Value;
+
+extern char WPL_Name[10];
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 
 #define SPEAK_ERR_CALIBARTION  1
@@ -12,8 +17,8 @@
 #define SPEAK_ERR_SENSOR 	 7
 #define SPEAK_ERR_GPS	 	 8
 #define SPEAK_ERR_MOTOR	 	 9
-#define SPEAK_MAX_TEMPERAT  10
-#define SPEAK_ALTI_REACHED  11
+#define SPEAK_MAX_TEMPERAT  10   // ->Motor Überlastung 
+#define SPEAK_ALTI_REACHED  11   // ?
 #define SPEAK_WP_REACHED    12
 #define SPEAK_NEXT_WP       13
 #define SPEAK_LANDING       14
@@ -24,34 +29,99 @@
 #define SPEAK_GPS_OFF       19
 #define SPEAK_BEEP          20
 #define SPEAK_MIKROKOPTER   21
-#define SPEAK_CAPACITY      22
+#define SPEAK_CAPACITY      22   // ?  
 #define SPEAK_CF_OFF        23
 #define SPEAK_CALIBRATE     24
 #define SPEAK_MAX_RANGE     25
 #define SPEAK_MAX_ALTITUD   26
 
+#define SPEAK_20M		  	37   // ?
 #define SPEAK_MK_OFF	  	38
 #define SPEAK_ALTITUDE_ON  	39
 #define SPEAK_ALTITUDE_OFF 	40
+#define SPEAK_100M		 	41
 #define SPEAK_CF_ON      	46
-#define SPEAK_SINKING      	47
+#define SPEAK_SINKING      	47   // ?
 #define SPEAK_RISING      	48
-#define SPEAK_HOLDING      	49
+#define SPEAK_HOLDING      	49   // ?
 #define SPEAK_GPS_ON      	50
-#define SPEAK_FOLLWING     	51
+#define SPEAK_FOLLWING     	51   // ?
 #define SPEAK_STARTING      52
+// Achtung: wenn > 53 -> JETI_CODE[53] anpassen
+/*
+1 Fehler: Kalibration
+2 Fehler: Empfang
+3 Fehler: Datenbus
+4 Fehler: Navi
+5 Fehler
+6 Fehler: Kompass
+7 Fehler: Sensor
+8 Fehler: GPS
+9 Fehler: Motor
+10 Fehler: Überlastung
+11 Höhe erreicht
+12 Wegpunkt erreicht
+13 Nächster Wegpunkt
+14 Landen
+15 GPS Fix
+16 Unterspannung
+17 GPS Halten
+18 GPS Home
+19 GPS Aus
+20 * Beep
+21 MikroKopter
+22 Kapazität
+23 Carefree aus
+24 Kalibriere
+25 Maximale Entfernung
+26 Maximale Höhe
 
-#define MAX_ERR_NUMBER (31+1)
+27 * Warnung
+28 * Failsafe aktiv
+29 * Failsafe aus
+30 * Redundanz aktiv
+31 * Redundanz aus
+32 * Starte Wegpunkt
+33 * Fehler: Überstrom
+34 * Fehler: Übertemperatur
+35 * Fehler: Failsafe
+36 * Fehler: Redundanz
+
+37 Zwanzig Meter
+38 MikroKopter aus
+39 Höhe Ein
+40 Höhe Aus
+41 Einhundert meter
+42 * Verbindung hergestellt
+43 * Verbindung unterbrochen
+44
+45
+46 Carefree ein
+47 Sinken
+48 Steigen
+49 Halten
+50 GPS ein
+51 Folgen
+52 Starten
+
+//fehlt: 
+//"Warnung"
+//"Failsafe"
+//"ERR:Redundanz ?"
+*/
+
+#define MAX_ERR_NUMBER (38+1)
 extern const char PROGMEM NC_ERROR_TEXT[MAX_ERR_NUMBER][17];
-extern unsigned char NaviData_WaypointIndex, NaviData_WaypointNumber, NaviData_TargetHoldTime;
 extern unsigned int NaviData_TargetDistance;
+extern unsigned char MaxBlTemperture;
+extern unsigned char MinBlTemperture;
+extern unsigned char HottestBl;
 
 extern unsigned char HottKeyboard,HoTT_RequestedSensor;
 extern unsigned char HottUpdate(unsigned char key);
 extern unsigned char SpeakHoTT,ShowSettingNameTime;
 extern unsigned char ToNC_SpeakHoTT;
 extern volatile unsigned char *HoTT_DataPointer;
-extern unsigned char MaxBlTempertaure;
 
 extern void CreateHoTT_Menu(void);
 extern void LIBFC_HoTT_Putchar(char);
@@ -224,6 +294,22 @@ extern HoTTGeneral_t HoTTGeneral;
 #define HOTT_GPS_PACKET_ID			0x8A
 #define HOTT_ELECTRIC_AIR_PACKET_ID	0x8E
 #define HOTT_GENERAL_PACKET_ID		0x8D
+#define JETI_GPS_PACKET_ID1			0x01
+#define JETI_GPS_PACKET_ID2			0x02
+#define HOTT_WPL_NAME				0x03
+
+//---------------------------------------------------------------------------------------------------
+typedef struct{
+  char offset;
+  unsigned char min;
+  unsigned char max;
+  char name[4];
+  unsigned char *Variable;
+} Parameter_List_t;
+
+#define MAXPARAM 41 //Muss eine ungerade Zahl sein
+extern const Parameter_List_t Parameter_List[];
+//---------------------------------------------------------------------------------------------------
 
 #endif 
 #endif

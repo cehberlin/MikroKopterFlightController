@@ -68,6 +68,8 @@
 #define JetiBox_printfxy(x,y,format, args...)  { LIBFC_JetiBox_SetPos(y * 16 + x); _printf_P(&LIBFC_JetiBox_Putchar, PSTR(format) , ## args);}
 #define JetiBox_printf(format, args...)        {  _printf_P(&LIBFC_JetiBox_Putchar, PSTR(format) , ## args);}
 
+unsigned char JumpToMenu = 0xff;
+
 // -----------------------------------------------------------
 // the menu functions
 // -----------------------------------------------------------
@@ -77,11 +79,11 @@ void Menu_Status(uint8_t key)
 	JetiBox_printfxy(0,0,"%2i.%1iV",UBat/10, UBat%10);
 	if(NaviDataOkay)
 	{
-		JetiBox_printfxy(6,0,"%3d%c %03dm%c",ErsatzKompassInGrad, 0xDF, GPSInfo.HomeDistance/10,NC_GPS_ModeCharacter);
+		JetiBox_printfxy(6,0,"%3d%c %3dm%c",CompassCorrected, 0xDF, GPSInfo.HomeDistance/10,NC_GPS_ModeCharacter);
 	}
 	else
 	{
-		JetiBox_printfxy(6,0,"Status");
+		JetiBox_printfxy(6,0,"Status    ");
 	}
 
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
@@ -103,10 +105,16 @@ void Menu_Status(uint8_t key)
 	  } 
 	}
 	else 
+	 if(NC_To_FC_Flags & NC_TO_FC_SIMULATION_ACTIVE)
+	 {
+	   JetiBox_printfxy(6,0,"SIMULATION");
+	 }
+	else 
 	if(ShowSettingNameTime)
 	{
 	 LIBFC_JetiBox_Clear();
-	 JetiBox_printfxy(0,1,"Set%d:%s  ",ActiveParamSet,EE_Parameter.Name); 
+	 JetiBox_printfxy(0,0,"Set%d:%s",ActiveParamSet,EE_Parameter.Name); 
+	 if(FC_StatusFlags3 & FC_STATUS3_BOAT) JetiBox_printfxy(0,1,"(Boat-Mode)"); 
 	 return; // nichts weiter ausgeben
 	}
 
@@ -118,6 +126,8 @@ void Menu_Status(uint8_t key)
 	{
 		JetiBox_printfxy(10,1,"%4im%c", (int16_t)(HoehenWert/100),VarioCharacter);
 	}
+	if(FC_StatusFlags3 & FC_STATUS3_REDUNDANCE_AKTIVE) JetiBox_printfxy(10,1,"R");
+
 #endif
 }
 
@@ -155,6 +165,271 @@ void Magnet_Values(uint8_t key)
 	JetiBox_printfxy(0,1,"Incli.:%3i%c (%i) ",EarthMagneticInclination, 0xDF,EarthMagneticInclinationTheoretic);
 #endif
 }
+
+
+void Menu_WPL_A1(uint8_t key)
+{                       //0123456789ABCDEF
+#if !defined (RECEIVER_SPEKTRUM_DX7EXP) && !defined (RECEIVER_SPEKTRUM_DX8EXP)
+	JetiBox_printfxy(0,0,"Load Waypoints");
+	JetiBox_printfxy(0,1,"(Fixed)      ");
+#endif
+}
+
+void Menu_WPL_R1(uint8_t key)
+{                       //0123456789ABCDEF
+#if !defined (RECEIVER_SPEKTRUM_DX7EXP) && !defined (RECEIVER_SPEKTRUM_DX8EXP)
+	JetiBox_printfxy(0,0,"Load Waypoints");
+	JetiBox_printfxy(0,1,"(Relative)   ");
+#endif
+}
+
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+void Menu_POINT_LD(uint8_t key)
+{                       //0123456789ABCDEF
+	JetiBox_printfxy(0,0,"Load singl.Point");
+//	JetiBox_printfxy(0,1,"(Fixed)      ");
+}
+#endif
+
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+void Menu_POINT_SV(uint8_t key)
+{                       //0123456789ABCDEF
+	JetiBox_printfxy(0,0,"Save singl.Point");
+//	JetiBox_printfxy(0,1,"(Relative)   ");
+}
+
+void Menu_AccCal_Ask(uint8_t key)
+{                       //0123456789ABCDEF
+	JetiBox_printfxy(0,0,"ACC calibration");
+//	JetiBox_printfxy(0,1,"(Relative)   ");
+}
+
+void Menu_AccCal(uint8_t key)
+{ 
+ static unsigned char changed = 0;
+						//0123456789ABCDEF
+	JetiBox_printfxy(0,0,"ACC calibration");
+
+	if((FC_StatusFlags & FC_STATUS_MOTOR_RUN) && ((NC_GPS_ModeCharacter == ' ') || (NC_GPS_ModeCharacter == '/') || (NC_GPS_ModeCharacter == '-')))
+	 {
+	  if(!EE_Parameter.Driftkomp) EE_Parameter.Driftkomp = 6; // enables the Gyro-Drift compensation to make sure that a litlte calibration error won't effect the attitude					  
+  	  JetiBox_printfxy(0,0,"ACC  N=%3i R=%3i",NeutralAccX,NeutralAccY);
+	  if(ChannelNick || ChannelRoll) 
+					JetiBox_printfxy(0,1,"Stick! (%i/%i)",ChannelNick,ChannelRoll)
+	  else	                           //0123456789ABCDEF
+	  if(changed) 	JetiBox_printfxy(0,1,"land to save    ")
+	  else  		JetiBox_printfxy(0,1,"use keys now    ") 
+	
+ 	  if(key== JETIBOX_KEY_UP   )  {NeutralAccX++;JetiBeep=130; changed = 1;}
+  	  if(key== JETIBOX_KEY_DOWN )  {NeutralAccX--;JetiBeep=130; changed = 1;}
+	  if(key== JETIBOX_KEY_RIGHT ) {NeutralAccY++;JetiBeep=130; changed = 1;}
+	  if(key== JETIBOX_KEY_LEFT)   {NeutralAccY--;JetiBeep=130; changed = 1;}
+    }
+	 else
+	 {
+	  if(!(FC_StatusFlags & FC_STATUS_MOTOR_RUN))    // motors are off 
+		 {
+	     if(key == JETIBOX_KEY_LEFT) { JumpToMenu = 0; changed = 0; }// Exit
+
+		 if(changed == 0) JetiBox_printfxy(0,1,"Fly with GPS off") 
+		 else
+		 if(changed == 1)
+		   {
+			  JetiBox_printfxy(0,1,"       save -->")
+		    if(key== JETIBOX_KEY_RIGHT) 
+			 {
+			  StoreNeutralToEeprom(); 
+			  JetiBeep = 130; 
+			  changed = 2;
+			 }
+		  } 
+		 else
+		 if(changed == 2)
+		   {
+			  JetiBox_printfxy(0,1," values stored  ");
+           }
+	   }                        //0123456789ABCDEF
+	   else JetiBox_printfxy(0,1,"switch GPS off  ") 
+	 }  
+//	JetiBox_printfxy(0,1,"(Relative)   ");
+}
+#endif
+
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+void Menu_POINT_SV2(uint8_t key)
+{                       //0123456789ABCDEF
+static unsigned char load_waypoint_tmp = 0, changed, hyterese = 1;
+static int delay;
+//  if(WPL_Name[0] == 0) JetiBox_printfxy(0,0,"Relative WPs ")
+//  else JetiBox_printfxy(0,0,"Rel:%s",WPL_Name);
+  JetiBox_printfxy(0,0,"Save Point:");
+  
+  if(NaviData_MaxWpListIndex == 0) JetiBox_printfxy(0,1,"no SD-Card")
+  else
+  if(GPSInfo.SatFix != SATFIX_3D) JetiBox_printfxy(0,1,"no GPS-Fix")
+  else
+  {
+	if(load_waypoint_tmp)	JetiBox_printfxy(11,0,"%2d",load_waypoint_tmp)
+	else JetiBox_printfxy(11,0,"--");
+
+//	if(NaviData_WaypointNumber)	JetiBox_printfxy(8,1,"%2d/%d ",NaviData_WaypointIndex,NaviData_WaypointNumber)
+//	else JetiBox_printfxy(8,1,"--/--")
+	JetiBox_printfxy(0,1,"Dir:%3d Alt:%3dm",CompassCorrected,(int16_t)(HoehenWert/100))
+
+    if(changed) 	JetiBox_printfxy(14,0,"->")
+	else            JetiBox_printfxy(14,0,"  ");
+
+	if(key == JETIBOX_KEY_UP && load_waypoint_tmp < NaviData_MaxWpListIndex) { load_waypoint_tmp++; changed = 1;}
+	if(key == JETIBOX_KEY_DOWN && load_waypoint_tmp > 1) { load_waypoint_tmp--; changed = 1; }
+
+	if(key == JETIBOX_KEY_RIGHT && load_waypoint_tmp)
+	{
+	 ToNC_Store_SingePoint = load_waypoint_tmp;
+	 changed = 0;
+	}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Bedienung per Taster am Sender
+  if(PPM_in[EE_Parameter.MenuKeyChannel] > 50)  // 
+   {
+    hyterese = 2;
+    if(CheckDelay(delay)) { load_waypoint_tmp = 0; hyterese = 1;}
+   }
+  else
+  if(PPM_in[EE_Parameter.MenuKeyChannel] < -50)  
+   {
+	delay = SetDelay(2500);
+	if(hyterese == 2 && (load_waypoint_tmp < NaviData_MaxWpListIndex))
+	 {
+	  load_waypoint_tmp++;
+	  ToNC_Store_SingePoint = load_waypoint_tmp;
+	  changed = 0;
+//	  JetiBeep = 'A'; // "MikroKopter"
+	 }
+    hyterese = 0; 
+   }
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  }
+}
+#endif
+
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+void Menu_POINT_LD2(uint8_t key)
+{                       //0123456789ABCDEF
+static unsigned char load_waypoint_tmp = 0, changed, hyterese = 1;
+static int delay;  
+//  if(WPL_Name[0] == 0) JetiBox_printfxy(0,0,"FIX Waypoints")
+//  else JetiBox_printfxy(0,0,"FIX:%s",WPL_Name);
+  JetiBox_printfxy(0,0,"Load Point")
+
+  if(NaviData_MaxWpListIndex == 0) JetiBox_printfxy(0,1,"no SD-Card")
+  else
+  {
+	if(load_waypoint_tmp)	JetiBox_printfxy(11,0,"%2d",load_waypoint_tmp)
+	else JetiBox_printfxy(11,0,"--");
+
+	if(NaviData_WaypointNumber)	JetiBox_printfxy(0,1,"Dist:%3d Alt:%3d ",NaviData_TargetDistance,(int16_t)(FromNC_AltitudeSetpoint/100))
+	else JetiBox_printfxy(8,1,"                ");
+	
+    if(changed) 	JetiBox_printfxy(14,0,"->")
+	else            JetiBox_printfxy(14,0,"  ");
+
+	if(key == JETIBOX_KEY_UP && load_waypoint_tmp < NaviData_MaxWpListIndex) { load_waypoint_tmp++; changed = 1;}
+	if(key == JETIBOX_KEY_DOWN && load_waypoint_tmp > 1) { load_waypoint_tmp--; changed = 1; }
+
+	if(key == JETIBOX_KEY_RIGHT && load_waypoint_tmp)
+	{
+	 ToNC_Load_SingePoint = load_waypoint_tmp;
+	 changed = 0;
+	}
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Bedienung per Taster am Sender
+  if(PPM_in[EE_Parameter.MenuKeyChannel] > 50)  // 
+   {
+    hyterese = 2;
+    if(CheckDelay(delay)) { load_waypoint_tmp = 0; hyterese = 1;}
+   }
+  else
+  if(PPM_in[EE_Parameter.MenuKeyChannel] < -50)  
+   {
+	delay = SetDelay(2500);
+	if(hyterese == 2 && (load_waypoint_tmp < NaviData_MaxWpListIndex))
+	 {
+	  load_waypoint_tmp++;
+	  ToNC_Load_SingePoint = load_waypoint_tmp;
+	  changed = 0;
+//	  JetiBeep = 'A'; // "MikroKopter"
+	 }
+    hyterese = 0; 
+   }
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  }
+}
+#endif
+
+
+void Menu_WPL_A2(uint8_t key)
+{                       //0123456789ABCDEF
+#if !defined (RECEIVER_SPEKTRUM_DX7EXP) && !defined (RECEIVER_SPEKTRUM_DX8EXP)
+static unsigned char load_waypoint_tmp = 1, changed;
+  
+  if(WPL_Name[0] == 0) JetiBox_printfxy(0,0,"FIX Waypoints")
+  else JetiBox_printfxy(0,0,"FIX:%s",WPL_Name);
+
+  if(NaviData_MaxWpListIndex == 0) JetiBox_printfxy(0,1,"no SD-Card")
+  else
+  {
+	JetiBox_printfxy(0,1,"#%2d WP:",load_waypoint_tmp);
+	if(NaviData_WaypointNumber)	JetiBox_printfxy(8,1,"%2d/%d ",NaviData_WaypointIndex,NaviData_WaypointNumber)
+	else JetiBox_printfxy(8,1,"--/--")
+	
+    if(changed) 	JetiBox_printfxy(14,1,"->")
+	else            JetiBox_printfxy(14,1,"  ");
+
+	if(key == JETIBOX_KEY_UP && load_waypoint_tmp < NaviData_MaxWpListIndex) { load_waypoint_tmp++; changed = 1;}
+	if(key == JETIBOX_KEY_DOWN && load_waypoint_tmp > 1) { load_waypoint_tmp--; changed = 1; }
+
+	if(key == JETIBOX_KEY_RIGHT && load_waypoint_tmp)
+	{
+	 ToNC_Load_WP_List = load_waypoint_tmp;
+	 changed = 0;
+	}
+  }
+#endif
+}
+
+void Menu_WPL_R2(uint8_t key)
+{                       //0123456789ABCDEF
+#if !defined (RECEIVER_SPEKTRUM_DX7EXP) && !defined (RECEIVER_SPEKTRUM_DX8EXP)
+static unsigned char load_waypoint_tmp = 1, changed;
+
+  if(WPL_Name[0] == 0) JetiBox_printfxy(0,0,"Relative WPs ")
+  else JetiBox_printfxy(0,0,"Rel:%s",WPL_Name);
+
+  if(NaviData_MaxWpListIndex == 0) JetiBox_printfxy(0,1,"no SD-Card")
+  else
+  if(GPSInfo.SatFix != SATFIX_3D) JetiBox_printfxy(0,1,"no GPS-Fix")
+  else
+  {
+	JetiBox_printfxy(0,1,"#%2d WPs:",load_waypoint_tmp);
+	if(NaviData_WaypointNumber)	JetiBox_printfxy(8,1,"%2d/%d ",NaviData_WaypointIndex,NaviData_WaypointNumber)
+	else JetiBox_printfxy(8,1,"--/--")
+
+    if(changed) 	JetiBox_printfxy(14,1,"->")
+	else            JetiBox_printfxy(14,1,"  ");
+
+	if(key == JETIBOX_KEY_UP && load_waypoint_tmp < NaviData_MaxWpListIndex) { load_waypoint_tmp++; changed = 1;}
+	if(key == JETIBOX_KEY_DOWN && load_waypoint_tmp > 1) { load_waypoint_tmp--; changed = 1; }
+
+	if(key == JETIBOX_KEY_RIGHT && load_waypoint_tmp)
+	{
+	 ToNC_Load_WP_List = load_waypoint_tmp | 0x80;
+	 changed = 0;
+	}
+  }
+#endif
+}
+
 
 
 void Menu_PosInfo(uint8_t key)
@@ -204,19 +479,44 @@ typedef struct{
 
 // the menu navigation structure
 /*						|
-
 3 - 0 - 1 - 2 - 3 - 0
-
 */
 
 const MENU_ENTRY JetiBox_Menu[] PROGMEM=
 { // l  r  u  d  pHandler
 #if !defined (RECEIVER_SPEKTRUM_DX7EXP) && !defined (RECEIVER_SPEKTRUM_DX8EXP)
-	{4, 1, 0, 0, &Menu_Status }, 	// 0
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+#define ACC_CAL  13
+	{8, 1, 0, 0, &Menu_Status }, 	// 0
 	{0, 2, 1, 1, &Menu_Temperature },	// 1
 	{1, 3, 2, 2, &Menu_Battery },	// 2
 	{2, 4, 3, 3, &Menu_PosInfo },	// 3
-	{3, 0, 4, 4, &Magnet_Values }	// 4
+	{3, 5, 4,10, &Menu_WPL_A1 },	// 4
+	{4, 6, 5,11, &Menu_WPL_R1 },	// 5
+	{5, 7, 6,12, &Menu_POINT_LD},	// 6
+	{6, 8, 7,13, &Menu_POINT_SV},	// 7
+	{7, 9, 8, 8, &Magnet_Values },	// 8
+	{8, 0, 9,14, &Menu_AccCal_Ask},// 9
+
+	{4,10,10,10, &Menu_WPL_A2 },	// 10
+	{5,11,11,11, &Menu_WPL_R2 },	// 11
+	{6,12,12,12, &Menu_POINT_LD2},	// 12
+	{7,13,13,13, &Menu_POINT_SV2},	// 13
+
+	{14,14,14,14, &Menu_AccCal},	// 14 
+#else
+	{6, 1, 0, 0, &Menu_Status }, 	// 0
+	{0, 2, 1, 1, &Menu_Temperature },	// 1
+	{1, 3, 2, 2, &Menu_Battery },	// 2
+	{2, 4, 3, 3, &Menu_PosInfo },	// 3
+	{3, 5, 7, 7, &Menu_WPL_A1 },	// 4
+	{4, 6, 8, 8, &Menu_WPL_R1 },	// 5
+	{5, 0, 6, 6, &Magnet_Values },	// 6
+
+	{4, 7, 7, 7, &Menu_WPL_A2 },	// 7
+	{5, 8, 8, 8, &Menu_WPL_R2 },	// 8
+#endif
+	
 #endif
 };
 
@@ -227,8 +527,7 @@ unsigned char JetiBox_Update(unsigned char key)
 {
 #if !defined (RECEIVER_SPEKTRUM_DX7EXP) && !defined (RECEIVER_SPEKTRUM_DX8EXP)
 	static uint8_t item = 0, last_item = 0; // the menu item
-	static uint8_t updateDelay = 1;
-
+	static uint8_t updateDelay = 1 , last_key;
 	// navigate within the menu by key action
 	last_item = item;
 	switch(key)
@@ -250,13 +549,15 @@ unsigned char JetiBox_Update(unsigned char key)
 		default:
 			break;
 	}
+	if(JumpToMenu != 0xff) { item = JumpToMenu; JumpToMenu = 0xff;};
 	// if the menu item has been changed, do not pass the key to the item handler
 	// to avoid jumping over to items
 	if(item != last_item) key = JETIBOX_KEY_UNDEF;
 
-	if (updateDelay++ & 0x01) 
+//	if((updateDelay++ & 0x01) || (key != last_key))
+	if((updateDelay++ & 0x01) || (key != JETIBOX_KEY_NONE))
 	{ 	
-
+		last_key = key;
 		LIBFC_JetiBox_Clear();
 		//execute menu item handler
 		((pFctMenu)(pgm_read_word(&(JetiBox_Menu[item].pHandler))))(key);

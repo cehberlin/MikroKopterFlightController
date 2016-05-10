@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include "twimaster.h"
 
-#define EEPARAM_REVISION	 95 // is count up, if paramater stucture has changed (compatibility)
+#define EEPARAM_REVISION	106 // is count up, if paramater stucture has changed (compatibility)
 #define EEMIXER_REVISION	 1  // is count up, if mixer stucture has changed (compatibility)
 
 #define EEPROM_ADR_PARAM_BEGIN		0
@@ -23,10 +23,14 @@
 #define PID_SPEAK_HOTT_CFG		 	16 // Byte
 #define PID_HARDWARE_VERSION	 	17 // Byte
 
+#define PID_GYRO_NICK         		18 // word
+#define PID_GYRO_ROLL         		20 // word
+#define PID_GYRO_YAW          		22 // word
+
 #define EEPROM_ADR_CHANNELS			80	// 80 - 93, 12 bytes + 1 byte crc
-#define EEPROM_ADR_PARAMSET			100 // 100 - 725, 5 * 125 bytes
+#define EEPROM_ADR_PARAMSET			100 // 100 - 770, 5 * 134 bytes (V1.06)
 #define EEPROM_ADR_MIXERTABLE		1000 // 1000 - 1078, 78 bytes
-#define EEPROM_ADR_BLCONFIG			1200 // 1200 - 1296, 12 * 8 bytes
+//#define EEPROM_ADR_BLCONFIG			1200 // 1200 - 1296, 12 * 8 bytes
 
 #define MIX_GAS		0
 #define MIX_NICK	1
@@ -46,12 +50,13 @@ extern uint8_t RequiredMotors;
 
 //GlobalConfig3
 #define CFG3_NO_SDCARD_NO_START  0x01
-#define CFG3_DPH_MAX_RADIUS      0x02
+//#define CFG3_DPH_MAX_RADIUS      0x02
 #define CFG3_VARIO_FAILSAFE      0x04
 #define CFG3_MOTOR_SWITCH_MODE   0x08
 #define CFG3_NO_GPSFIX_NO_START  0x10
 #define CFG3_USE_NC_FOR_OUT1     0x20
 #define CFG3_SPEAK_ALL           0x40
+#define CFG3_SERVO_NICK_COMP_OFF 0x80
 
 //GlobalConfig
 #define CFG_HOEHENREGELUNG       0x01
@@ -76,27 +81,25 @@ extern uint8_t RequiredMotors;
 // ExtraConfig
 #define CFG2_HEIGHT_LIMIT       		0x01
 #define CFG2_VARIO_BEEP       			0x02
-#define CFG_SENSITIVE_RC     		    0x04
+//#define CFG_SENSITIVE_RC     		    0x04
 #define CFG_3_3V_REFERENCE   		    0x08
 #define CFG_NO_RCOFF_BEEPING     		0x10
 #define CFG_GPS_AID   		     		0x20
 #define CFG_LEARNABLE_CAREFREE   		0x40
 #define CFG_IGNORE_MAG_ERR_AT_STARTUP   0x80
 
-// bit mask for ParamSet.Config0
-#define CFG0_AIRPRESS_SENSOR		0x01
-#define CFG0_HEIGHT_SWITCH			0x02
-#define CFG0_HEADING_HOLD			0x04
-#define CFG0_COMPASS_ACTIVE			0x08
-#define CFG0_COMPASS_FIX			0x10
-#define CFG0_GPS_ACTIVE				0x20
-#define CFG0_AXIS_COUPLING_ACTIVE	0x40
-#define CFG0_ROTARY_RATE_LIMITER	0x80
-
 // bitcoding for EE_Parameter.ServoCompInvert
 #define SERVO_NICK_INV 0x01
 #define SERVO_ROLL_INV 0x02
 #define SERVO_RELATIVE 0x04   //  direct poti control or relative moving of the servo value
+#define CH_DIRECTION_1 0x08
+#define CH_DIRECTION_2 0x10
+
+//CH Orientation     ServoBits 		0x08    0x10
+// --> no change                   	0       0
+// --> front to starting point 		0       1
+// --> rear to to starting point	1       0
+//-> start orientation           	1       1
 
 // defines for the receiver selection
 #define RECEIVER_PPM				0
@@ -107,7 +110,8 @@ extern uint8_t RequiredMotors;
 #define RECEIVER_ACT_DSL			5
 #define RECEIVER_HOTT				6
 #define RECEIVER_SBUS				7
-#define RECEIVER_USER				8
+#define RECEIVER_MLINK				8
+#define RECEIVER_USER				9
 
 #define RECEIVER_UNKNOWN			0xFF
 
@@ -149,7 +153,7 @@ typedef struct
 	unsigned char Hoehe_Verstaerkung;     // Wert : 0-50
 	unsigned char Hoehe_ACC_Wirkung;      // Wert : 0-250
 	unsigned char Hoehe_HoverBand;        // Wert : 0-250
-	unsigned char Hoehe_GPS_Z;            // Wert : 0-250
+	unsigned char Hoehe_TiltCompensation; // Wert : 0-250
 	unsigned char Hoehe_StickNeutralPoint;// Wert : 0-250
 	unsigned char Stick_P;                // Wert : 1-6
 	unsigned char Stick_D;                // Wert : 0-64
@@ -213,7 +217,7 @@ typedef struct
 	unsigned char WARN_J16_Bitmask;       // for the J16 Output
 	unsigned char WARN_J17_Bitmask;       // for the J17 Output
 	//---NaviCtrl---------------------------------------------
-	unsigned char NaviOut1Parameter;      // for the J16 Output
+	unsigned char AutoPhotoDistance;      // Auto Photo
 	unsigned char NaviGpsModeChannel;     // Parameters for the Naviboard
 	unsigned char NaviGpsGain;
 	unsigned char NaviGpsP;
@@ -227,9 +231,10 @@ typedef struct
 	unsigned char NaviStickThreshold;
 	unsigned char NaviWindCorrection;
 	unsigned char NaviAccCompensation;    // New since 0.86 -> was: SpeedCompensation
-	unsigned char NaviOperatingRadius;
+	unsigned char NaviMaxFlyingRange;     // in 10m
 	unsigned char NaviAngleLimitation;
 	unsigned char NaviPH_LoginTime;
+	unsigned char NaviDescendRange;
 	//---Ext.Ctrl---------------------------------------------
 	unsigned char ExternalControl;         // for serial Control
 	//---CareFree---------------------------------------------
@@ -243,8 +248,21 @@ typedef struct
 	unsigned char FailsafeChannel;         // if the value of this channel is > 100, the MK reports "RC-Lost"
 	unsigned char ServoFilterNick;  
 	unsigned char ServoFilterRoll;  
+    unsigned char Servo3OnValue;
+    unsigned char Servo3OffValue;
+    unsigned char Servo4OnValue;
+    unsigned char Servo4OffValue;
+	unsigned char ServoFS_Pos[5];
 	unsigned char StartLandChannel;  
 	unsigned char LandingSpeed;  
+	unsigned char CompassOffset;         
+	unsigned char AutoLandingVoltage;    // in 0,1V  0 -> disabled
+	unsigned char ComingHomeVoltage;    // in 0,1V  0 -> disabled
+	unsigned char AutoPhotoAtitudes;
+	unsigned char SingleWpSpeed;
+	unsigned char LandingPulse;
+	unsigned char SingleWpControlChannel;
+	unsigned char MenuKeyChannel;
 	//------------------------------------------------
 	unsigned char BitConfig;          // (war Loop-Cfg) Bitcodiert: 0x01=oben, 0x02=unten, 0x04=links, 0x08=rechts / wird getrennt behandelt
 	unsigned char ServoCompInvert;    // //  0x01 = Nick, 0x02 = Roll, 0x04 = relative moving // WICHTIG!!! am Ende lassen
@@ -252,7 +270,7 @@ typedef struct
 	unsigned char GlobalConfig3;      // bitcodiert
 	char Name[12];
 	unsigned char crc;				  // must be the last byte!
-} paramset_t; // 127 bytes 
+} paramset_t; // 134 bytes (V1.06)
 
 #define  PARAMSET_STRUCT_LEN  sizeof(paramset_t)
 

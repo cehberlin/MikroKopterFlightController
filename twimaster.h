@@ -5,26 +5,28 @@
 
 #define TWI_STATE_MOTOR_TX 			0
 #define TWI_STATE_MOTOR_RX 			5
-#define TWI_STATE_GYRO_OFFSET_TX	18
+//#define TWI_STATE_GYRO_OFFSET_TX	18
 
-extern volatile uint8_t twi_state;
+extern volatile uint8_t twi_state, ReadBlSize;
 extern volatile uint8_t motor_write;
 extern volatile uint8_t motor_read;
 extern volatile uint8_t I2C_TransferActive;
-
+extern uint8_t Max_I2C_Packets;
 extern uint8_t MissingMotor;
 
-#define MAX_MOTORS	12
+#define MAX_MOTORS	16
 #define MOTOR_STATE_PRESENT_MASK		0x80
 #define MOTOR_STATE_ERROR_MASK			0x7F
 
+//Motor[x].Version
 #define MOTOR_STATE_NEW_PROTOCOL_MASK 	0x01
+#define MOTOR_STATE_FAST_MODE           0x02
+#define MOTOR_STATE_BL30                0x04   // extended Current measurement -> 200 = 20A    201 = 21A    255 = 75A (20+55)
 
 #define BLFLAG_TX_COMPLETE		0x01
 #define BLFLAG_READ_VERSION 	0x02
 
 extern volatile uint8_t BLFlags;
-
 
 #define BL_READMODE_STATUS  0
 #define BL_READMODE_CONFIG	16
@@ -39,10 +41,34 @@ typedef struct
 	// the following bytes must be exactly in that order!
 	uint8_t Current;  			// in 0.1 A steps, read back from BL
 	uint8_t MaxPWM;   			// read back from BL -> is less than 255 if BL is in current limit, not running (250) or starting (40)
-	int8_t  Temperature;		// old BL-Ctrl will return a 255 here, the new version the temp. in °C
+	uint8_t Temperature;		// old BL-Ctrl will return a 255 here, the new version the temp. in °C
+	uint8_t RPM;				// Raw value for RPM
+	uint8_t reserved1;			// Voltage (BL3) or mAh (BL2)
+	uint8_t Voltage;			// in 0.1V (BL3 is limited to 255, BL2 is only low-byte)
+	uint8_t SlaveI2cError;		// BL2 & BL3
+	uint8_t VersionMajor;		// BL2 & BL3
+	uint8_t VersionMinor;		// BL2 & BL3
+	uint8_t NotReadyCnt; 		// Counts up is the Motor is not ready during flight -> MotorRestart etc.
 } __attribute__((packed)) MotorData_t;
 
 extern MotorData_t Motor[MAX_MOTORS];
+
+// BitSate
+#define BL_BIT_STATE_I2C_OK 	0x01
+#define BL_BIT_STATE_I2C_VALUE 	0x02
+#define BL_BIT_STATE_I2C_BAD	0x04
+#define BL_BIT_STATE_PPM_OK	 	0x08
+#define BL_BIT_STATE_MOTOR_RUN 	0x10
+
+typedef struct
+{
+	unsigned char BitSate; 
+	unsigned char Current; 
+	unsigned char State;  
+	unsigned char TemperatureInDeg;	  
+	unsigned char Voltage80;	  
+} __attribute__((packed)) RedundantBl_t;
+extern RedundantBl_t RedundantMotor[MAX_MOTORS];
 
 #define BLCONFIG_REVISION 2
 
@@ -51,14 +77,14 @@ extern MotorData_t Motor[MAX_MOTORS];
 #define MASK_SET_TEMP_LIMIT			0x04
 #define MASK_SET_CURRENT_SCALING	0x08
 #define MASK_SET_BITCONFIG			0x10
-#define MASK_RESET_CAPCOUNTER		0x20
+#define MASK_SET_STARTPWM			0x20
 #define MASK_SET_DEFAULT_PARAMS		0x40
 #define MASK_SET_SAVE_EEPROM	 	0x80
 
 #define BITCONF_REVERSE_ROTATION 0x01
-#define BITCONF_RES1 0x02
-#define BITCONF_RES2 0x04
-#define BITCONF_RES3 0x08
+#define BITCONF_STARTGAS1 0x02
+#define BITCONF_STARTGAS2 0x04
+#define BITCONF_STARTGAS3 0x08
 #define BITCONF_RES4 0x10
 #define BITCONF_RES5 0x20
 #define BITCONF_RES6 0x40

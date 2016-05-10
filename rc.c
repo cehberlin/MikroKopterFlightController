@@ -63,6 +63,7 @@ volatile int PPM_diff[MAX_RC_IN];  // das differnzierte Stick-Signal
 volatile char Channels,tmpChannels = 0;
 volatile unsigned char NewPpmData = 1;
 unsigned int PPM_Neutral = 466;
+signed int ChannelNick,ChannelRoll,ChannelGas,ChannelYaw;
 
 //############################################################################
 // Clear the values
@@ -90,10 +91,6 @@ void rc_sum_init(void)
 ISR(TIMER1_CAPT_vect)
 //############################################################################
 {
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-if(!(EE_Parameter.ExtraConfig & CFG_SENSITIVE_RC))
-#endif
- {
 	static unsigned int AltICR=0;
     signed int signal = 0,tmp;
 	static int index;
@@ -123,118 +120,27 @@ if(!(EE_Parameter.ExtraConfig & CFG_SENSITIVE_RC))
                 if(tmp > signal+1) tmp--; else
                 if(tmp < signal-1) tmp++;
                 if(SenderOkay >= 195)  PPM_diff[index] = ((tmp - PPM_in[index]) / 3) * 3;
-                else PPM_diff[index] = 0;
-                PPM_in[index] = tmp;
+				else PPM_diff[index] = 0; 
+				PPM_in[index] = tmp;
+				if(SenderOkay < 50) 
+					{				  
+						PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] = 0;
+						PPM_in[EE_Parameter.Kanalbelegung[K_ROLL]] = 0;
+						PPM_in[EE_Parameter.Kanalbelegung[K_GIER]] = 0;
+						PPM_in[EE_Parameter.Kanalbelegung[K_GAS]] = 0;
+					}
                 }
             index++;
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-#else
+/*
 		   if(PlatinenVersion < 20)
             {	
              if(index == 5) J3High; else J3Low;  // Servosignal an J3 anlegen
              if(index == 6) J4High; else J4Low;  // Servosignal an J4 anlegen
              if(index == 7) J5High; else J5Low;  // Servosignal an J5 anlegen
 			}
-#endif
+*/
         }
 	}
- }
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
- else
- {
-	static unsigned int AltICR=0;
-    static int ppm_in[13+4];
-    static int ppm_diff[13+4];
-    static int old_ppm_in[13+4];
-    static int old_ppm_diff[13+4];
-    signed int signal = 0,tmp;
-	static unsigned char index, okay_cnt = 0;
-	signal = (unsigned int) ICR1 - AltICR;
-	AltICR = ICR1;
-    //Syncronisationspause? (3.52 ms < signal < 25.6 ms)
-	if((signal > 1100) && (signal < 8000))
-        {
-        tmpChannels = index;
-        if(tmpChannels >= 4 && Channels == tmpChannels)
-		 {
-          if(okay_cnt > 10)
-		   {
-		   NewPpmData = 0;  // Null bedeutet: Neue Daten
-		   for(index = 0; index < 13+4; index++)
-		    {
-			 if(okay_cnt > 30)
-			  {
-			   old_ppm_in[index] = PPM_in[index];
-			   old_ppm_diff[index] = PPM_diff[index];
-			  }
-		     PPM_in[index] = ppm_in[index];
-		     PPM_diff[index] = ppm_diff[index];
-		    }
-		   }
-          if(okay_cnt < 255) okay_cnt++;
-		 }
-         else
-		  {
-		   if(okay_cnt > 100) okay_cnt = 10; else okay_cnt = 0;
-		   ROT_ON;
-		  }
-        index = 1;
-        if(!MotorenEin) Channels = tmpChannels;
-        }
- 	else
-        {
-        if(index < 13+4)
-            {
-            if((signal > 250) && (signal < 687))
-                {
-                signal -= PPM_Neutral;
-                // Stabiles Signal
-                if((abs(signal - ppm_in[index]) < 6))
-				 {
-			  	  if(EE_Parameter.FailsafeChannel == 0 || PPM_in[EE_Parameter.FailsafeChannel] < 100)  // forces Failsafe if the receiver doesn't have 'signal loss' on Failsafe
-				  {
-				   if(okay_cnt > 25)  SenderOkay += 10;
-				   else
-				   if(okay_cnt > 10)  SenderOkay += 2;
-				   if(SenderOkay > 200) SenderOkay = 200;
-				  } 
-				 }
-                tmp = (3 * (ppm_in[index]) + signal) / 4;
-                if(tmp > signal+1) tmp--; else
-                if(tmp < signal-1) tmp++;
-                if(SenderOkay >= 190)  ppm_diff[index] = ((tmp - ppm_in[index]) / 3) * 3;
-                else ppm_diff[index] = 0;
-                ppm_in[index] = tmp;
-                }
-			else ROT_ON;
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
-#else
-		   if(PlatinenVersion < 20)
-            {	
-             if(index == 5) J3High; else J3Low;  // Servosignal an J3 anlegen
-             if(index == 6) J4High; else J4Low;  // Servosignal an J4 anlegen
-             if(index == 7) J5High; else J5Low;  // Servosignal an J5 anlegen
-			}
-#endif
-          }
-		  if(index < 20) index++;
-          else
-		  if(index == 20)
-		  {
-            unsigned char i;
-            ROT_ON;
-		    index = 30;
-            for(i=0;i<13+4;i++) // restore from older data
-			 {
-		      PPM_in[i] = old_ppm_in[i];
-		      PPM_diff[i] = 0;
-//			  okay_cnt /= 2;
- 	         }
-		  }
-	    }
- }
-#endif
-
 }
 
 #else

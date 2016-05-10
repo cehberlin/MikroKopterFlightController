@@ -57,7 +57,8 @@
 #include "timer0.h"
 #include "analog.h"
 
-#define CAPACITY_UPDATE_INTERVAL 10 // 10 ms
+//#define CAPACITY_UPDATE_INTERVAL 10 // 10 ms
+#define CAPACITY_UPDATE_INTERVAL 50 // 50 ms  = 20Hz
 #define FC_OFFSET_CURRENT 5  // calculate with a current of 0.5A
 #define BL_OFFSET_CURRENT 2  // calculate with a current of 0.2A
 
@@ -75,6 +76,19 @@ void Capacity_Init(void)
 	update_timer = SetDelay(CAPACITY_UPDATE_INTERVAL);
 }
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// + extended Current measurement -> 200 = 20A    201 = 21A    255 = 75A (20+55)
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+unsigned int BL3_Current(unsigned char who) // in 0,1A
+{
+ if(Motor[who].Current == 255) return(0); // invalid
+ if(Motor[who].Current <= 200) return(Motor[who].Current);
+ else
+ {
+  if(Motor[who].Version & MOTOR_STATE_BL30) return(200 + 10 * ((unsigned int)Motor[who].Current-200));
+  else return(Motor[who].Current);
+ }
+}
 
 // called in main loop at a regular interval
 void Capacity_Update(void)
@@ -93,18 +107,26 @@ void Capacity_Update(void)
 		SetSum = 0;
 		NumOfMotors = 0;
 		MinOfMaxPWM = 255;
+		if(Capacity.MinOfMaxPWM == 254) 		FC_StatusFlags3 |= FC_STATUS3_REDUNDANCE_AKTIVE;
+//		else if(Capacity.MinOfMaxPWM == 255) 	FC_StatusFlags3 &= ~FC_STATUS3_REDUNDANCE_AKTIVE;
+		
 		for(i = 0; i < MAX_MOTORS; i++)
 		{
-			if(Motor[i].State & MOTOR_STATE_PRESENT_MASK)
+			if(Motor[i].State & MOTOR_STATE_PRESENT_MASK/* && Mixer.Motor[i][MIX_GAS]*/)
 			{
 				NumOfMotors++;
-				Current += (unsigned int)(Motor[i].Current);
+				if(Motor[i].Current > 200)
+				 {
+				  Current += BL3_Current(i); // extended Current measurement -> 200 = 20A    201 = 21A    255 = 75A (20+55)
+				 }
+				 else Current += (unsigned int)(Motor[i].Current);
 				SetSum +=  (unsigned int)(Motor[i].SetPoint);
-				if(Motor[i].MaxPWM < MinOfMaxPWM) MinOfMaxPWM = Motor[i].MaxPWM;
+				if(Motor[i].MaxPWM <= MinOfMaxPWM) MinOfMaxPWM = Motor[i].MaxPWM; 
+				else 
+				if(Motor[i].MaxPWM == 255) FC_StatusFlags3 &= ~FC_STATUS3_REDUNDANCE_AKTIVE;
 			}
 		}
 		Capacity.MinOfMaxPWM = MinOfMaxPWM;
-
 		if(SetSum == 0) // if all setpoints are 0
 		{ // determine offsets of motor currents
 			#define CURRENT_AVERAGE 8  // 8bit = 256 * 10 ms = 2.56s average time
@@ -113,6 +135,7 @@ void Capacity_Update(void)
 			SumCurrentOffset += Current;
 			// after averaging set current to static offset
 			Current = FC_OFFSET_CURRENT;
+			FC_StatusFlags3 &= ~FC_STATUS3_REDUNDANCE_AKTIVE;	
 		}
 		else // some motors are running, includes also motor test condition, where "MotorRunning" is false
 		{   // subtract offset
@@ -135,7 +158,7 @@ void Capacity_Update(void)
 		// = 1mA * 0.1s * CAPACITY_UPDATE_INTERVAL = 1mA * 1min / (600 / CAPACITY_UPDATE_INTERVAL)
 		// = 1mAh / (36000 / CAPACITY_UPDATE_INTERVAL)
 		#define SUB_COUNTER_LIMIT (36000 / CAPACITY_UPDATE_INTERVAL)
-		if(SubCounter > SUB_COUNTER_LIMIT)
+		while(SubCounter > SUB_COUNTER_LIMIT)
 		{
 			Capacity.UsedCapacity++;			// we have one mAh more
 			SubCounter -= SUB_COUNTER_LIMIT;	// keep the remaining sub part

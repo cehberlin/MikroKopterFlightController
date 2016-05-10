@@ -54,12 +54,14 @@
 unsigned char DisableRcOffBeeping = 0;
 unsigned char PlatinenVersion = 10;
 unsigned char BattLowVoltageWarning = 94;
+unsigned char BattAutoLandingVoltage = 0, BattComingHomeVoltage = 0;
 unsigned int FlugMinuten = 0,FlugMinutenGesamt = 0;
 unsigned int FlugSekunden = 0;
 pVoidFnct_pVoidFnctChar_const_fmt _printf_P;
 unsigned char FoundMotors = 0;
 unsigned char JetiBeep = 0; // to allow any Morse-Beeping of the Jeti-Box
 unsigned char ActiveParamSet = 3;
+unsigned char LipoCells = 4;
 
 void PrintLine(void)
 {
@@ -70,8 +72,9 @@ void PrintLine(void)
 void CalMk3Mag(void)
 {
  static unsigned char stick = 1;
- if(PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] > -20) stick = 0;
- if((PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] < -70) && !stick)
+ ChannelAssingment();
+ if(ChannelNick > -20) stick = 0;
+ if((ChannelNick < -70) && !stick)
   {
    stick = 1;
    WinkelOut.CalcState++;
@@ -87,30 +90,130 @@ void CalMk3Mag(void)
 
 void LipoDetection(unsigned char print)
 {
-	#define MAX_CELL_VOLTAGE 43 // max cell volatage for LiPO
-	unsigned int timer, cells;
-	if(print) printf("\n\rBatt:");
-	if(EE_Parameter.UnterspannungsWarnung < 50) // automatische Zellenerkennung
-	{
-		timer = SetDelay(500);
-		if(print) while (!CheckDelay(timer));
-		// up to 6s LiPo, less than 2s is technical impossible
-		for(cells = 2; cells < 7; cells++)
-		{
-			if(UBat < cells * MAX_CELL_VOLTAGE) break;
-		}
+unsigned int warning;
+	#define MAX_CELL_VOLTAGE 43 // max cell voltage for LiPO
+	if(print) 
+	 {
+	  printf("\n\rBatt:");
+	  LipoCells = 1 + UBat / MAX_CELL_VOLTAGE; 
+	  if(LipoCells > 6) LipoCells = 6;
+	 } 
 
-		BattLowVoltageWarning = cells * EE_Parameter.UnterspannungsWarnung;
+	if(EE_Parameter.UnterspannungsWarnung < 50) 
+	{
+		warning = LipoCells * EE_Parameter.UnterspannungsWarnung;
 		if(print)
 		{
-			Piep(cells, 200);
-			printf(" %d Cells ", cells);
+			Piep(LipoCells, 200);
+			printf(" %d Cells ", LipoCells);
 		}
 	}
-	else BattLowVoltageWarning = EE_Parameter.UnterspannungsWarnung;
-	if(print) printf(" Low warning: %d.%d",BattLowVoltageWarning/10,BattLowVoltageWarning%10);
+	else warning = EE_Parameter.UnterspannungsWarnung;
+    if(warning > 255) warning = 255; BattLowVoltageWarning = warning;
+	// automatische Zellenerkennung
+	if(EE_Parameter.AutoLandingVoltage < 50) warning = LipoCells * EE_Parameter.AutoLandingVoltage; else warning = EE_Parameter.AutoLandingVoltage;
+	if(warning > 255) warning = 255; BattAutoLandingVoltage = warning;
+	
+	if(EE_Parameter.ComingHomeVoltage < 50)  warning = LipoCells * EE_Parameter.ComingHomeVoltage; else warning = EE_Parameter.ComingHomeVoltage;
+	if(warning > 255) warning = 255; BattComingHomeVoltage = warning;
+
+	if(BattAutoLandingVoltage > BattLowVoltageWarning) BattAutoLandingVoltage = BattLowVoltageWarning - 1; 
+	if(BattComingHomeVoltage  >= BattLowVoltageWarning) BattComingHomeVoltage  = BattLowVoltageWarning - 1; 
+	if(BattAutoLandingVoltage >= BattComingHomeVoltage && EE_Parameter.ComingHomeVoltage) BattAutoLandingVoltage = BattComingHomeVoltage - 1; 
+	
+	if(print) 
+	 {
+	  printf(" Low warning: %d.%dV",BattLowVoltageWarning/10,BattLowVoltageWarning%10);
+	  if(BattComingHomeVoltage) printf("  Auto-CH: %d.%dV",BattComingHomeVoltage/10,BattComingHomeVoltage%10);
+	  if(BattAutoLandingVoltage) printf("  Autolanding: %d.%dV",BattAutoLandingVoltage/10,BattAutoLandingVoltage%10);
+	 } 
+
 }
 
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+void LoadStoreSingleWP(void)
+{
+// +++++++++++++++++++++++++++++++++++++++++++
+// + Load/Store one single point
+// +++++++++++++++++++++++++++++++++++++++++++
+static unsigned char switch_hyterese = 0, hyterese = 1, wp_tmp_s = 0, wp_tmp_l = 0;
+static int delay;
+
+ if(PPM_in[EE_Parameter.SingleWpControlChannel] > 50)  // Switch Up -> load
+ {
+    if(switch_hyterese == 1 || switch_hyterese == 3) 
+	 {
+	  ToNC_Load_SingePoint = 1;
+	  switch_hyterese = 2;
+	  SpeakHoTT = SPEAK_NEXT_WP;
+	  Show_Load_Time = 5;
+	  Show_Load_Value = 1;
+	  wp_tmp_l = 1;
+	 } 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Bedienung per Taster am Sender
+  if(PPM_in[EE_Parameter.MenuKeyChannel] > 50)  // 
+   {
+    hyterese = 2;
+    if(CheckDelay(delay)) { wp_tmp_l = 0; hyterese = 1;}
+   }
+  else
+  if(PPM_in[EE_Parameter.MenuKeyChannel] < -50)  
+   {
+	delay = SetDelay(2500);
+	if(hyterese == 2 && (wp_tmp_l < NaviData_MaxWpListIndex))
+	 {
+	  wp_tmp_l++;
+	  ToNC_Load_SingePoint = wp_tmp_l;
+	  Show_Load_Time = 5;
+	  Show_Load_Value = wp_tmp_l;
+	  SpeakHoTT = SPEAK_NEXT_WP;
+	 }
+    hyterese = 0; 
+   }
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ }
+ else
+ if(PPM_in[EE_Parameter.SingleWpControlChannel] < -50) // Switch Down -> store
+ {
+    if(switch_hyterese == 1 || switch_hyterese == 2) 
+	 {
+	  ToNC_Store_SingePoint = 1;
+	  switch_hyterese = 3;
+	  SpeakHoTT = SPEAK_MIKROKOPTER;
+	  Show_Store_Time = 5;
+	  Show_Store_Value = 1;
+	  wp_tmp_s = 1;
+	 } 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Bedienung per Taster am Sender
+  if(PPM_in[EE_Parameter.MenuKeyChannel] > 50)  // 
+   {
+    hyterese = 2;
+    if(CheckDelay(delay)) { wp_tmp_s = 0; hyterese = 1;}
+   }
+  else
+  if(PPM_in[EE_Parameter.MenuKeyChannel] < -50)  
+   {
+	delay = SetDelay(2500);
+	if(hyterese == 2 && (wp_tmp_s < NaviData_MaxWpListIndex))
+	 {
+	  wp_tmp_s++;
+	  ToNC_Store_SingePoint = wp_tmp_s;
+	  Show_Store_Time = 5;
+	  Show_Store_Value = wp_tmp_s;
+	  SpeakHoTT = SPEAK_MIKROKOPTER;
+	 }
+    hyterese = 0; 
+   }
+ }
+ else  // Middle
+ {
+    switch_hyterese = 1;
+ }
+}
+// +++++++++++++++++++++++++++++++++++++++++++
+#endif
 //############################################################################
 //Hauptprogramm
 int main (void)
@@ -132,7 +235,9 @@ int main (void)
 	 }
      else          
      {
-	  PlatinenVersion = 23; ACC_AltitudeControl = 1;
+	  PlatinenVersion = 25; 
+	  ACC_AltitudeControl = 1;
+	  J4Low;
   	 }  
 #else
 	if(PINB & 0x01)
@@ -164,7 +269,7 @@ int main (void)
     WDTCSR = 0;
 
     beeptime = 2500;
-	StickGier = 0; PPM_in[K_GAS] = 0; StickRoll = 0; StickNick = 0;
+	StickGier = 0; StickRoll = 0; StickNick = 0;
     if(PlatinenVersion >= 20)  GIER_GRAD_FAKTOR = 1220; else GIER_GRAD_FAKTOR = 1291; // unterschiedlich für ME und ENC
     ROT_OFF;
     GRN_ON;
@@ -181,36 +286,49 @@ int main (void)
 	GRN_ON;
     sei();
 	ParamSet_Init();
-
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    if(PlatinenVersion < 20) 
+	{
+	    wdt_enable(WDTO_250MS); // Reset-Commando
+		while(1) printf("\n\rOld FC Hardware not supported by this Firmware!");
+	}
+#ifndef REDUNDANT_FC_SLAVE
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // + Check connected BL-Ctrls
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// Check connected BL-Ctrls
 	BLFlags |= BLFLAG_READ_VERSION;
 	motor_read = 0;  // read the first I2C-Data
-	SendMotorData();
-	timer = SetDelay(500);
-	while(!(BLFlags & BLFLAG_TX_COMPLETE) && !CheckDelay(timer)); //wait for complete transfer
-
+	for(i=0; i < 500; i++)
+	{
+ 	 SendMotorData();
+	 timer = SetDelay(5);
+	 while(!(BLFlags & BLFLAG_TX_COMPLETE) && !CheckDelay(timer)); //wait for complete transfer
+    }
     printf("\n\rFound BL-Ctrl: ");
-    timer = SetDelay(4000);
+//    timer = SetDelay(1000);
 	for(i=0; i < MAX_MOTORS; i++)
 	{
-		SendMotorData();
-		while(!(BLFlags & BLFLAG_TX_COMPLETE)  && !CheckDelay(timer)); //wait for complete transfer
+//		SendMotorData();
+//		while(!(BLFlags & BLFLAG_TX_COMPLETE)  && !CheckDelay(timer)); //wait for complete transfer
 		if(Mixer.Motor[i][0] > 0) // wait max 4 sec for the BL-Ctrls to wake up
 		{
 			while(!CheckDelay(timer) && !(Motor[i].State & MOTOR_STATE_PRESENT_MASK) )
 			{
-				SendMotorData();
-				while(!(BLFlags & BLFLAG_TX_COMPLETE) && !CheckDelay(timer)); //wait for complete transfer
+				if((BLFlags & BLFLAG_TX_COMPLETE)) SendMotorData();
+				//while(!(BLFlags & BLFLAG_TX_COMPLETE) && !CheckDelay(timer)); //wait for complete transfer
 			}
 		}
 		if(Motor[i].State & MOTOR_STATE_PRESENT_MASK)
 		{
-			printf("%d",i+1);
+		    unsigned char vers;
+			printf("%d",(i+1)%10);
 			FoundMotors++;
-//			if(Motor[i].Version & MOTOR_STATE_NEW_PROTOCOL_MASK) printf("(new) ");
+			vers = Motor[i].VersionMajor * 100 + Motor[i].VersionMinor; // creates 104 from 1.04
+			if(vers && VersionInfo.BL_Firmware > vers) VersionInfo.BL_Firmware = vers;
+//if(Motor[i].Version & MOTOR_STATE_FAST_MODE) printf("(fast)");
+//if(Motor[i].Version & MOTOR_STATE_NEW_PROTOCOL_MASK) printf("(new)");
+//printf(":V%03d\n\r",vers);
 		}
 	}
 	for(i=0; i < MAX_MOTORS; i++)
@@ -222,11 +340,28 @@ int main (void)
 		}
 		Motor[i].State &= ~MOTOR_STATE_ERROR_MASK; // clear error counter
 	}
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+   if(VersionInfo.BL_Firmware != 255) 
+    {
+	 printf("\n\rBL-Firmware %d.%02d",VersionInfo.BL_Firmware/100,VersionInfo.BL_Firmware%100);
+	 if(VersionInfo.BL_Firmware >= 100 && VersionInfo.BL_Firmware <= 102) printf("<-- warning old Version!");
+	} 
+#endif
+
    PrintLine();// ("\n\r===================================");
-
-
     if(RequiredMotors < FoundMotors) VersionInfo.HardwareError[1] |= FC_ERROR1_MIXER;
+	if(RequiredMotors > 8) Max_I2C_Packets = 8; else Max_I2C_Packets = RequiredMotors;
+#else
+ printf("\n\r\n\r--> REDUNDANT SLAVE <---\n\r");
+#endif
 
+#ifdef REDUNDANT_FC_MASTER
+ printf("\n\r\n\r--> REDUNDANT MASTER <---\n\r");
+#endif
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Calibrating altitude sensor
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	//if(EE_Parameter.GlobalConfig & CFG_HOEHENREGELUNG)
 	{
 		printf("\n\rCalibrating pressure sensor..");
@@ -236,13 +371,16 @@ int main (void)
 		printf("OK\n\r");
 	}
 
+#ifdef REDUNDANT_FC_SLAVE
+VersionInfo.HardwareError[0] = 0;
+VersionInfo.HardwareError[1] = 0;
+#endif
+
 	SetNeutral(0);
 
 	ROT_OFF;
 
     beeptime = 2000;
-    ExternControl.Digital[0] = 0x55;
-
 
 	FlugMinuten = (unsigned int)GetParamByte(PID_FLIGHT_MINUTES) * 256 + (unsigned int)GetParamByte(PID_FLIGHT_MINUTES + 1);
 	FlugMinutenGesamt = (unsigned int)GetParamByte(PID_FLIGHT_MINUTES_TOTAL) * 256 + (unsigned int)GetParamByte(PID_FLIGHT_MINUTES_TOTAL + 1);
@@ -269,15 +407,21 @@ int main (void)
     DebugOut.Status[0] = 0x01 | 0x02;
 	JetiBeep = 0;
     if(EE_Parameter.ExtraConfig & CFG_NO_RCOFF_BEEPING)	  DisableRcOffBeeping = 1;
-	EEAR = EE_DUMMY;  // Set the EEPROM Address pointer to an unused space
+	ReadBlSize = 3; // don't read the version any more
+#ifdef REDUNDANT_FC_SLAVE
+	timer = SetDelay(2500);
+	while(!CheckDelay(timer));
+	printf("\n\rStart\n\r");
+#endif
 	while(1)
 	{
+	EEAR = EE_DUMMY;  // Set the EEPROM Address pointer to an unused space
 	if(ReceiverUpdateModeActive) while (1) PORTC &= ~(1<<7); // Beeper off
-//GRN_ON;
 	if(UpdateMotor && AdReady)      // ReglerIntervall
             {
-//GRN_OFF;
-			UpdateMotor=0;    
+cli();
+			UpdateMotor--;    
+sei();
             if(WinkelOut.CalcState) CalMk3Mag();
             else  MotorRegler();
 			SendMotorData();
@@ -288,6 +432,17 @@ int main (void)
 				TIMSK1 |= _BV(ICIE1); // enable PPM-Input
 				PPM_in[0] = 0; // set RSSI to zero on data timeout
 				VersionInfo.HardwareError[1] |= FC_ERROR1_PPM;
+				// Now clear the channel values - they would be wrong
+				PPM_diff[EE_Parameter.Kanalbelegung[K_NICK]] = 0;
+				PPM_diff[EE_Parameter.Kanalbelegung[K_ROLL]] = 0;
+				PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] = 0;
+				PPM_in[EE_Parameter.Kanalbelegung[K_ROLL]] = 0;
+				PPM_in[EE_Parameter.Kanalbelegung[K_GIER]] = 0;
+				PPM_in[EE_Parameter.Kanalbelegung[K_GAS]] = 0;
+				ChannelNick = 0;
+				ChannelRoll = 0;
+				ChannelYaw = 0;
+				ChannelGas = 0;
 			}
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //if(HoehenReglerAktiv && NaviDataOkay && SenderOkay < 160 && SenderOkay > 10 && FromNaviCtrl_Value.SerialDataOkay > 220) SenderOkay = 160;
@@ -320,8 +475,11 @@ int main (void)
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 		   if(NewSBusData) ProcessSBus();  
 		   else
+		   if(NewMlinkData) ProcessMlinkData();
+           else
 #endif
 		   {
+			if(BytegapSPI == 0)  SPI_TransmitByte(); 
 			if(CalculateServoSignals) CalculateServo();
 			DatenUebertragung();
 			BearbeiteRxDaten();
@@ -330,6 +488,26 @@ int main (void)
 				static unsigned char second;
 				timer += 20; // 20 ms interval
 				CalcNickServoValue();
+				// ++++++++++++++++++++++++++++
+				// + New direction setpoint from NC
+				if(NC_CompassSetpoint != -1)
+				{
+				   int diff;
+				   if(!NeueKompassRichtungMerken && (KompassSollWert != NC_CompassSetpoint) && (CareFree || NCForcesNewDirection)) 
+				    {
+				     diff = ((540 + (KompassSollWert - NC_CompassSetpoint)) % 360) - 180;
+					 if(diff > 2) diff = 2;    // max. 2° in 20ms = 100°/sec
+					 else
+					 if(diff < -2) diff = -2;
+					 KompassSollWert -= diff;
+					}
+					else 
+					 {
+					  NC_CompassSetpoint = -1;
+					  NCForcesNewDirection = 0; // allows Yawing without CareFree (Yawing at Coming Home)
+					 } 
+				 }
+				// ++++++++++++++++++++++++++++
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 				if(EE_Parameter.Receiver == RECEIVER_HOTT) HoTT_Menu();
 				else 
@@ -347,9 +525,9 @@ int main (void)
 				 else AccZ_ErrorCnt = 0;
 				// ++++++++++++++++++++++++++++
 #endif
-				if(MissingMotor)
+				if(MissingMotor || Capacity.MinOfMaxPWM < 30)
 				 {
-				  VersionInfo.HardwareError[1] |= FC_ERROR1_BL_MISSING;
+				  if(MissingMotor) VersionInfo.HardwareError[1] |= FC_ERROR1_BL_MISSING;
 				  DebugOut.Status[1] |= 0x02; // BL-Error-Status
 				 }
 				 else
@@ -363,10 +541,6 @@ int main (void)
 				if(PcZugriff) PcZugriff--;
 				else
 				{
-					ExternControl.Config = 0;
-					ExternStickNick = 0;
-					ExternStickRoll = 0;
-					ExternStickGier = 0;
 					if(!SenderOkay)
 					{
 					  if(BeepMuster == 0xffff && DisableRcOffBeeping != 2)  
@@ -406,28 +580,59 @@ int main (void)
 					FromNC_AltitudeSpeed = 0;
 					FromNC_AltitudeSetpoint = 0;
 					VersionInfo.Flags &= ~FC_VERSION_FLAG_NC_PRESENT;
+					NC_To_FC_Flags = 0;
                     NaviDataOkay = 0;
 				}
-			   if(UBat < BattLowVoltageWarning)
+			   if(UBat <= BattLowVoltageWarning)
 				{
 					FC_StatusFlags |= FC_STATUS_LOWBAT;
-					if(BeepMuster == 0xffff)
+					if(BeepMuster == 0xffff && UBat > 10) // Do not beep, if the voltage reading is below 1V (Supplied via MKUSB)
 					{
 						beeptime = 6000;
 						BeepMuster = 0x0300;
 					}
 				}
-				else if(!beeptime) FC_StatusFlags &= ~FC_STATUS_LOWBAT;
-				SendSPI = SPI_BYTEGAP;
-				EEAR = EE_DUMMY;  // Set the EEPROM Address pointer to an unused space
+				// +++++++++++++++++++++++++++++++++
+				if(ExternalControlTimeout) 
+				 {
+				  ExternalControlTimeout--;
+				  if(ExternalControlTimeout == 1) 
+				    { 
+					  ExternalControl.Config = 0; 
+					  beeptime = 2000;
+					}  
+				 } 
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+// +++++++++++++++++++++++++++++++++++++++++++
+// + Load/Store one single point
+// +++++++++++++++++++++++++++++++++++++++++++
+				if(EE_Parameter.SingleWpControlChannel) LoadStoreSingleWP();
+// +++++++++++++++++++++++++++++++++++++++++++
+#endif				   
+#ifdef NO_RECEIVER
+ PPM_in[EE_Parameter.Kanalbelegung[K_NICK]] = 0; PPM_in[EE_Parameter.Kanalbelegung[K_ROLL]] = 0; PPM_in[EE_Parameter.Kanalbelegung[K_GIER]] = 0; PPM_in[EE_Parameter.Kanalbelegung[K_GAS]] = 0;
+ PPM_in[EE_Parameter.HoeheChannel] = (unsigned char) 200;
+ PPM_in[EE_Parameter.NaviGpsModeChannel] = (unsigned char) 200;
+ PPM_in[EE_Parameter.CareFreeChannel] = (unsigned char) 200;
+ SenderOkay = 180;
+ MotorenEin = 0;
+#endif
+
 				// +++++++++++++++++++++++++++++++++
 				// Sekundentakt
                 if(++second == 49)
 				 {
 				   second = 0;
+
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 				   if(ShowSettingNameTime) ShowSettingNameTime--;
+				   if(Show_Load_Time) Show_Load_Time--;
+				   if(Show_Store_Time) Show_Store_Time--;
 #endif				   
+				   if(NC_To_FC_Flags & NC_TO_FC_FAILSAFE_LANDING)  ServoFailsafeActive = SERVO_FS_TIME;
+				   else
+				   if(ServoFailsafeActive) ServoFailsafeActive--;
+
 				   if(FC_StatusFlags & FC_STATUS_FLY) FlugSekunden++;
 				   else timer2 = 1450; // 0,5 Minuten aufrunden
 				   if(modell_fliegt < 1024)
@@ -435,7 +640,16 @@ int main (void)
 					 if(StartLuftdruck < Luftdruck) StartLuftdruck += 5; 
 					 else
 					 if(StartLuftdruck > Luftdruck) StartLuftdruck -= 5; 
+					 FC_StatusFlags3 &= ~FC_STATUS3_REDUNDANCE_ERROR; 
 					} 
+					else 
+					{
+#ifdef REDUNDANT_FC_MASTER
+					  if(!(FC_StatusFlags3 & FC_STATUS3_REDUNDANCE_AKTIVE)) FC_StatusFlags3 |= FC_STATUS3_REDUNDANCE_ERROR; 
+					  else FC_StatusFlags3 &= ~FC_STATUS3_REDUNDANCE_ERROR; 
+#endif
+					}
+			     if(UBat > BattLowVoltageWarning + 1) FC_StatusFlags &= ~FC_STATUS_LOWBAT;
 				 }
 				// +++++++++++++++++++++++++++++++++
 				if(++timer2 == 2930)  // eine Minute
@@ -452,13 +666,18 @@ int main (void)
 			}
            LED_Update();
            Capacity_Update();
-           } //else DebugOut.Analog[26]++;
-          }
+           } 
+          } //else DebugOut.Analog[18]++;
 		  if(update_spi) update_spi--;
 		 } // 500Hz
-	 if(update_spi == 0) { SPI_StartTransmitPacket(); update_spi = 12;}  // 41Hz
-	 else if(!SendSPI) { SPI_TransmitByte(); }
+	 if(update_spi == 0) // 41Hz
+	  { 
+	    if(SPI_StartTransmitPacket()) update_spi = 12; 
+		else 
+		if(BytegapSPI == 0)  SPI_TransmitByte();  
+	   }  
+	 else if(BytegapSPI == 0)  SPI_TransmitByte(); 
     }
 }
-//DebugOut.Analog[16]
+//DebugOut.Analog[] 
 

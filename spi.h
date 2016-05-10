@@ -6,7 +6,7 @@
 #include "vector.h"
 
 #define USE_SPI_COMMUNICATION
-#define SPI_BYTEGAP 3
+#define SPI_BYTEGAP 5
 //-----------------------------------------
 #define DDR_SPI DDRB
 #define SLAVE_SELECT_DDR_PORT   DDRC
@@ -61,9 +61,12 @@
 #define SPI_FCCMD_MISC			12
 #define SPI_FCCMD_PARAMETER1	13
 #define SPI_FCCMD_VERSION		14
-#define SPI_FCCMD_SERVOS		15
+#define SPI_FCCMD_SLOW3 		15
 #define SPI_FCCMD_BL_ACCU		16
 #define SPI_FCCMD_PARAMETER2	17
+#define SPI_FCCMD_NEUTRAL		18
+#define SPI_FCCMD_SLOW			19
+#define SPI_FCCMD_SLOW2			20
 
 struct str_ToNaviCtrl
 {
@@ -128,7 +131,7 @@ struct str_FromNaviCtrl_Value
  signed char Kalman_MaxDrift;
  signed char Kalman_MaxFusion;
  unsigned char SerialDataOkay;
- signed char GpsZ;
+ signed char reserve;
 };
 
 struct str_SPI_VersionInfo
@@ -175,7 +178,7 @@ extern unsigned char SPI_CommandCounter,NaviDataOkay;
 extern signed char FromNC_Rotate_C, FromNC_Rotate_S;
 extern unsigned char NC_ErrorCode;
 extern void SPI_MasterInit(void);
-extern void SPI_StartTransmitPacket(void);
+extern unsigned char SPI_StartTransmitPacket(void);
 extern void UpdateSPI_Buffer(void);
 extern void SPI_TransmitByte(void);
 extern signed int POI_KameraNick;
@@ -183,12 +186,14 @@ extern unsigned char NC_GPS_ModeCharacter, NC_To_FC_Flags, NC_To_FC_MaxAltitude;
 extern vector16_t MagVec;
 extern unsigned char EarthMagneticField;
 extern unsigned char EarthMagneticInclination,EarthMagneticInclinationTheoretic;
+extern signed char FromNC_WP_EventChannel_New;
+extern unsigned char NCForcesNewDirection; // allows Yawing without CareFree (Yawing at Coming Home)
 #else
 
 
 // -------------------------------- Dummy -----------------------------------------
 #define  SPI_MasterInit() ;
-#define  SPI_StartTransmitPacket() ;
+//#define  SPI_StartTransmitPacket() ;
 #define  UpdateSPI_Buffer() ;
 #define  SPI_TransmitByte() ;
 #endif

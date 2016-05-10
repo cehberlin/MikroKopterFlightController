@@ -3,28 +3,28 @@
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // + Software Nutzungsbedingungen (english version: see below)
 // + der Fa. HiSystems GmbH, Flachsmeerstrasse 2, 26802 Moormerland - nachfolgend Lizenzgeber genannt -
-// + Der Lizenzgeber rÃ¤umt dem Kunden ein nicht-ausschlieÃŸliches, zeitlich und rÃ¤umlich* unbeschrÃ¤nktes Recht ein, die im den
-// + Mikrocontroller verwendete Firmware fÃ¼r die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool
-// + - nachfolgend Software genannt - nur fÃ¼r private Zwecke zu nutzen.
-// + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulÃ¤ssig.
+// + Der Lizenzgeber räumt dem Kunden ein nicht-ausschließliches, zeitlich und räumlich* unbeschränktes Recht ein, die im den
+// + Mikrocontroller verwendete Firmware für die Hardware Flight-Ctrl, Navi-Ctrl, BL-Ctrl, MK3Mag & PC-Programm MikroKopter-Tool 
+// + - nachfolgend Software genannt - nur für private Zwecke zu nutzen.
+// + Der Einsatz dieser Software ist nur auf oder mit Produkten des Lizenzgebers zulässig.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// + Die vom Lizenzgeber gelieferte Software ist urheberrechtlich geschÃ¼tzt. Alle Rechte an der Software sowie an sonstigen im
-// + Rahmen der Vertragsanbahnung und VertragsdurchfÃ¼hrung Ã¼berlassenen Unterlagen stehen im VerhÃ¤ltnis der Vertragspartner ausschlieÃŸlich dem Lizenzgeber zu.
+// + Die vom Lizenzgeber gelieferte Software ist urheberrechtlich geschützt. Alle Rechte an der Software sowie an sonstigen im
+// + Rahmen der Vertragsanbahnung und Vertragsdurchführung überlassenen Unterlagen stehen im Verhältnis der Vertragspartner ausschließlich dem Lizenzgeber zu.
 // + Die in der Software enthaltenen Copyright-Vermerke, Markenzeichen, andere Rechtsvorbehalte, Seriennummern sowie
-// + sonstige der Programmidentifikation dienenden Merkmale dÃ¼rfen vom Kunden nicht verÃ¤ndert oder unkenntlich gemacht werden.
-// + Der Kunde trifft angemessene Vorkehrungen fÃ¼r den sicheren Einsatz der Software. Er wird die Software grÃ¼ndlich auf deren
+// + sonstige der Programmidentifikation dienenden Merkmale dürfen vom Kunden nicht verändert oder unkenntlich gemacht werden.
+// + Der Kunde trifft angemessene Vorkehrungen für den sicheren Einsatz der Software. Er wird die Software gründlich auf deren
 // + Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
-// + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulÃ¤ssig - begrenzt in HÃ¶he des typischen und vorhersehbaren
-// + Schadens. Die gesetzliche Haftung bei PersonenschÃ¤den und nach dem Produkthaftungsgesetz bleibt unberÃ¼hrt. Dem Lizenzgeber steht jedoch der Einwand
+// + Die Haftung des Lizenzgebers wird - soweit gesetzlich zulässig - begrenzt in Höhe des typischen und vorhersehbaren
+// + Schadens. Die gesetzliche Haftung bei Personenschäden und nach dem Produkthaftungsgesetz bleibt unberührt. Dem Lizenzgeber steht jedoch der Einwand 
 // + des Mitverschuldens offen.
-// + Der Kunde trifft angemessene Vorkehrungen fÃ¼r den Fall, dass die Software ganz oder teilweise nicht ordnungsgemÃ¤ÃŸ arbeitet.
-// + Er wird die Software grÃ¼ndlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
+// + Der Kunde trifft angemessene Vorkehrungen für den Fall, dass die Software ganz oder teilweise nicht ordnungsgemäß arbeitet.
+// + Er wird die Software gründlich auf deren Verwendbarkeit zu dem von ihm beabsichtigten Zweck testen, bevor er diese operativ einsetzt.
 // + Der Kunde wird er seine Daten vor Einsatz der Software nach dem Stand der Technik sichern.
-// + Der Kunde ist darÃ¼ber unterrichtet, dass der Lizenzgeber seine Daten im zur VertragsdurchfÃ¼hrung erforderlichen Umfang
-// + und auf Grundlage der Datenschutzvorschriften erhebt, speichert, verarbeitet und, sofern notwendig, an Dritte Ã¼bermittelt.
-// + *) Die rÃ¤umliche Nutzung bezieht sich nur auf den Einsatzort, nicht auf die Reichweite der programmierten Software.
+// + Der Kunde ist darüber unterrichtet, dass der Lizenzgeber seine Daten im zur Vertragsdurchführung erforderlichen Umfang
+// + und auf Grundlage der Datenschutzvorschriften erhebt, speichert, verarbeitet und, sofern notwendig, an Dritte übermittelt.
+// + *) Die räumliche Nutzung bezieht sich nur auf den Einsatzort, nicht auf die Reichweite der programmierten Software.
 // + #### ENDE DER NUTZUNGSBEDINGUNGEN ####'
-// +  Hinweis: Informationen Ã¼ber erweiterte Nutzungsrechte (wie z.B. Nutzung fÃ¼r nicht-private Zwecke) sind auf Anfrage per Email an info(@)hisystems.de verfÃ¼gbar.
+// +  Hinweis: Informationen über erweiterte Nutzungsrechte (wie z.B. Nutzung für nicht-private Zwecke) sind auf Anfrage per Email an info(@)hisystems.de verfügbar.
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // + Software LICENSING TERMS
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -70,9 +70,9 @@
 #define BLPARAM_REVISION 1
 #define MASK_SET_PWM_SCALING		0x01
 #define MASK_SET_CURRENT_LIMIT		0x02
-#define MASK_SET_TEMP_LIMIT		0x04
+#define MASK_SET_TEMP_LIMIT			0x04
 #define MASK_SET_CURRENT_SCALING	0x08
-#define MASK_SET_BITCONFIG		0x10
+#define MASK_SET_BITCONFIG			0x10
 #define MASK_RESET_CAPCOUNTER		0x20
 #define MASK_SET_DEFAULT_PARAMS		0x40
 #define MASK_SET_SAVE_EEPROM	 	0x80
@@ -84,7 +84,7 @@ unsigned volatile char NeuerDatensatzEmpfangen = 0;
 unsigned volatile char NeueKoordinateEmpfangen = 0;
 unsigned volatile char UebertragungAbgeschlossen = 1;
 unsigned volatile char CntCrcError = 0;
-unsigned volatile char AnzahlEmpfangsBytes = 0;
+unsigned volatile char AnzahlEmpfangsBytes = 0;   // achtung: das ist die AscII-Buffer länge, nicht die Nettodatenlänge
 unsigned volatile char TxdBuffer[MAX_SENDE_BUFF];
 unsigned volatile char RxdBuffer[MAX_EMPFANGS_BUFF];
 
@@ -98,8 +98,9 @@ unsigned char PcZugriff = 100;
 unsigned char MotorTest[16];
 unsigned char MeineSlaveAdresse = 1; // Flight-Ctrl
 unsigned char ConfirmFrame;
+unsigned char ExternalControlTimeout = 0;
 struct str_DebugOut    DebugOut;
-struct str_ExternControl  ExternControl;
+struct str_ExternControl  ExternalControl;
 struct str_VersionInfo VersionInfo;
 struct str_WinkelOut WinkelOut;
 struct str_Data3D Data3D;
@@ -139,16 +140,26 @@ const unsigned char ANALOG_TEXT[32][16] PROGMEM =
     "Height Setpoint ",
     "25              ", //25
 	"26              ", //"26 CPU OverLoad ",
-    "Compass Setpoint",
+    "27              ",
     "I2C-Error       ",
     "BL Limit        ",
     "GPS_Nick        ", //30
     "GPS_Roll        "
 };
     
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++ Calculate checksum
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+unsigned char CalculateDebugLableCrc(void)
+{
+	unsigned int i;
+	unsigned char crc = 0;
+	for(i=0;i<sizeof(ANALOG_TEXT);i++) crc += pgm_read_word(&ANALOG_TEXT[0][i]);
+	return(crc);
+}
 	
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//++ Sende-Part der DatenÃ¼bertragung
+//++ Sende-Part der Datenübertragung
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ISR(USART0_TX_vect)
 {
@@ -161,16 +172,17 @@ ISR(USART0_TX_vect)
    tmp_tx = TxdBuffer[ptr];
    if((tmp_tx == '\r') || (ptr == MAX_SENDE_BUFF))
     {
+//if(DebugOut.Analog[] < ptr) DebugOut.Analog[] = ptr;
      ptr = 0;
      UebertragungAbgeschlossen = 1;
     }
    UDR0 = tmp_tx;
   }
-  else ptr = 0;
+  else ptr = 0;                                                                  
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//++ Empfangs-Part der DatenÃ¼bertragung, incl. CRC-Auswertung
+//++ Empfangs-Part der Datenübertragung, incl. CRC-Auswertung
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ISR(USART0_RX_vect)
 {
@@ -187,6 +199,7 @@ ISR(USART0_RX_vect)
  if(buf_ptr >= MAX_SENDE_BUFF)    UartState = 0;
  if(SioTmp == '\r' && UartState == 2)
   {
+//if(DebugOut.Analog[] < buf_ptr) DebugOut.Analog[] = buf_ptr;
    UartState = 0;
    crc -= RxdBuffer[buf_ptr-2];
    crc -= RxdBuffer[buf_ptr-1];
@@ -200,7 +213,7 @@ ISR(USART0_RX_vect)
      NeuerDatensatzEmpfangen = 1;
 	 AnzahlEmpfangsBytes = buf_ptr + 1;
      RxdBuffer[buf_ptr] = '\r';
-	 if(RxdBuffer[2] == 'R')
+	 if(RxdBuffer[2] == 'R' && !MotorenEin)
 	  {
 	   LcdClear();
 	   wdt_enable(WDTO_250MS); // Reset-Commando
@@ -226,6 +239,7 @@ ISR(USART0_RX_vect)
 		  RxdBuffer[buf_ptr] = SioTmp;
 		  if(buf_ptr < MAX_EMPFANGS_BUFF) buf_ptr++;
 		  else UartState = 0;
+//if(DebugOut.Analog[] < buf_ptr) DebugOut.Analog[] = buf_ptr;
 		  crc += SioTmp;
 		  break;
    default:
@@ -362,7 +376,7 @@ void BearbeiteRxDaten(void)
  if(!NeuerDatensatzEmpfangen) return;
 
 	unsigned char tempchar1, tempchar2;
-	unsigned int beepLength = 0;
+    unsigned int beepLength = 0;
 	Decode64(); // dekodiere datenblock im Empfangsbuffer
 	switch(RxdBuffer[1]-'a') // check for Slave Address
 	{
@@ -371,7 +385,6 @@ void BearbeiteRxDaten(void)
 		{
 			case 'K':// Kompasswert
 					memcpy((unsigned char *)&KompassValue , (unsigned char *)pRxData, sizeof(KompassValue));
-//					KompassRichtung = ((540 + KompassValue - KompassSollWert) % 360) - 180;
 					break;
 			case 't':// Motortest
 			        if(AnzahlEmpfangsBytes > 20) memcpy(&MotorTest[0], (unsigned char *)pRxData, sizeof(MotorTest));
@@ -389,15 +402,15 @@ void BearbeiteRxDaten(void)
 					break;
 
 			case 'm':// "Write Mixer
-                                        if(pRxData[0] == EEMIXER_REVISION)
-                                                            {
-                                           memcpy(&Mixer, (unsigned char *)pRxData, sizeof(Mixer) - 1);
-                                           MixerTable_WriteToEEProm();
-                                                               tempchar1 = 1;
-                                                               VersionInfo.HardwareError[1] &= ~FC_ERROR1_MIXER;
-                                                            }
-                                        else
-                                        {
+                    if(pRxData[0] == EEMIXER_REVISION)
+					{
+                       memcpy(&Mixer, (unsigned char *)pRxData, sizeof(Mixer) - 1);
+                       MixerTable_WriteToEEProm();
+					   tempchar1 = 1;
+					   VersionInfo.HardwareError[1] &= ~FC_ERROR1_MIXER;
+					}
+                    else
+                    {
 						tempchar1 = 0;
 					}
 					while(!UebertragungAbgeschlossen);
@@ -414,9 +427,10 @@ void BearbeiteRxDaten(void)
 					PcZugriff = 255;
 					break;
 
-			case 'q':// "Get"-Anforderung fÃ¼r Settings
-					// Bei Get werden die vom PC einstellbaren Werte vom PC zurÃ¼ckgelesen
-					if(MotorenEin) break;
+			case 'q':// "Get"-Anforderung für Settings
+					// Bei Get werden die vom PC einstellbaren Werte vom PC zurückgelesen
+				   if(!MotorenEin) 
+				   {
 					if((10 <= pRxData[0]) && (pRxData[0] < 20))
 					{
 						tempchar1 = pRxData[0] - 10;
@@ -443,13 +457,15 @@ void BearbeiteRxDaten(void)
 						// load requested parameter set
 						ParamSet_ReadFromEEProm(tempchar1);
 					}
+					LipoDetection(0);
+				   } else tempchar1 = GetActiveParamSet();	
 					while(!UebertragungAbgeschlossen);
 					SendOutData('Q', FC_ADDRESS, 2, &tempchar1, sizeof(tempchar1), (unsigned char *) &EE_Parameter, sizeof(EE_Parameter) - 1);
 					Debug("Lese Setting %d", tempchar1);
 					break;
 			case 'r':  //execute calibration
 			                if( pRxData[0] == 1  ){
-                                          preFlightCalibration();
+                                          preFlightCalibration(1);
 			                }else if( pRxData[0] == 2 ){
 			                  persistedCalibration();
 			                }
@@ -477,8 +493,11 @@ void BearbeiteRxDaten(void)
 					}
 					while(!UebertragungAbgeschlossen);
 					SendOutData('S', FC_ADDRESS, 1, &tempchar1, sizeof(tempchar1));
-					if(!MotorenEin) Piep(tempchar1,110);
-					LipoDetection(0);
+					if(!MotorenEin) 
+					 {
+					  Piep(tempchar1,110);
+					  LipoDetection(0);
+					 } 
 					LIBFC_ReceiverInit(EE_Parameter.Receiver);
 					break;
 			case 'f': // auf anderen Parametersatz umschalten
@@ -487,8 +506,11 @@ void BearbeiteRxDaten(void)
 					tempchar1 = GetActiveParamSet();
 					while(!UebertragungAbgeschlossen);
 					SendOutData('F', FC_ADDRESS, 1, &tempchar1, sizeof(tempchar1));
-					Piep(tempchar1,110);
-					LipoDetection(0);
+					if(!MotorenEin) 
+					 {
+					  Piep(tempchar1,110);
+					  LipoDetection(0);
+					 } 
 					LIBFC_ReceiverInit(EE_Parameter.Receiver);
 					break;
 			case 'y':// serial Potis
@@ -583,6 +605,34 @@ void BearbeiteRxDaten(void)
 
 		switch(RxdBuffer[2])
 		{
+#ifdef REDUNDANT_FC_SLAVE
+		static unsigned int clear_I;
+			case '?':// Serielle Antwort eines BL-Reglers
+					tempchar1 = RxdBuffer[1] - ('a'+11);
+					if(tempchar1 >= MAX_MOTORS) break;
+					memcpy((unsigned char *)&RedundantMotor[tempchar1], (unsigned char *)pRxData, sizeof(RedundantBl_t));
+					if(RedundantMotor[tempchar1].BitSate & BL_BIT_STATE_I2C_OK && clear_I) clear_I--;
+					if(!(RedundantMotor[tempchar1].BitSate & BL_BIT_STATE_I2C_OK)) ROT_FLASH;
+					GRN_FLASH;
+					if(RedundantMotor[tempchar1].BitSate & BL_BIT_STATE_I2C_BAD)
+					{
+					ROT_ON;
+					 if(clear_I == 0)
+					  {
+						SummeNick = 0;
+						SummeRoll = 0;
+						Mess_Integral_Gier = 0;
+					  }	
+					 clear_I = 500;
+					}
+					Motor[tempchar1].Current 		= RedundantMotor[tempchar1].Current;
+					Motor[tempchar1].MaxPWM			= RedundantMotor[tempchar1].State;
+					Motor[tempchar1].Temperature 	= RedundantMotor[tempchar1].TemperatureInDeg;
+//DebugOut.Analog[16] = RedundantMotor[tempchar1].BitSate;
+//DebugOut.Analog[17]++;
+//DebugOut.Analog[18] = tempchar1;
+					break;
+#endif
 			// 't' comand placed here only for compatibility to BL
 			case 't':// Motortest
 			        if(AnzahlEmpfangsBytes >= sizeof(MotorTest)) memcpy(&MotorTest[0], (unsigned char *)pRxData, sizeof(MotorTest));
@@ -596,7 +646,6 @@ void BearbeiteRxDaten(void)
 			// 'K' comand placed here only for compatibility to old MK3MAG software, that does not send the right Slave Address
 			case 'K':// Kompasswert
 					memcpy((unsigned char *)&KompassValue , (unsigned char *)pRxData, sizeof(KompassValue));
-//					KompassRichtung = ((540 + KompassValue - KompassSollWert) % 360) - 180;
 					break;
 			case 'a':// Texte der Analogwerte
 					DebugTextAnforderung = pRxData[0];
@@ -604,9 +653,12 @@ void BearbeiteRxDaten(void)
 					PcZugriff = 255;
 					break;
 			case 'b':
-					memcpy((unsigned char *)&ExternControl, (unsigned char *)pRxData, sizeof(ExternControl));
-					ConfirmFrame = ExternControl.Frame;
-					PcZugriff = 255;
+					if(AnzahlEmpfangsBytes < 20) // prevents that the old frame is valid
+					 {
+					  memcpy((unsigned char *)&ExternalControl, (unsigned char *)pRxData, sizeof(ExternalControl));
+					  ConfirmFrame = ExternalControl.Frame;
+					  ExternalControlTimeout = 100; // 2 seconds timeout
+					 }
 					break;
 			case 'c': // Poll the 3D-Data
                     if(!Intervall3D) { if(pRxData[0]) Timer3D = SetDelay(pRxData[0] * 10);}
@@ -617,12 +669,12 @@ void BearbeiteRxDaten(void)
 					PcZugriff = 255;
 					DebugDataIntervall = (unsigned int)pRxData[0] * 10;
 					if(DebugDataIntervall > 0){
-                                            DebugDataAnforderung = 1;
-                                        }else
-                                        {
-                                            DebugDataAnforderung = 0;
-                                            DebugDataIntervall = 0;
-                                        }
+                        DebugDataAnforderung = 1;
+                    }else
+                    {
+                        DebugDataAnforderung = 0;
+                        DebugDataIntervall = 0;
+                    }
 					//AboTimeOut = SetDelay(ABO_TIMEOUT);
 					break;
 
@@ -649,9 +701,12 @@ void BearbeiteRxDaten(void)
 					DebugDisplayAnforderung1 = 1;
 					break;
 			case 'v': // Version-Anforderung und Ausbaustufe
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+					if(RxDataLen > 0 && pRxData[0] == 2) GetVersionAnforderung = 2;
+					else
+#endif
 					GetVersionAnforderung = 1;
 					break;
-
 			case 'g'://
 					GetExternalControl = 1;
 					break;
@@ -668,7 +723,7 @@ void BearbeiteRxDaten(void)
 }
 
 //############################################################################
-//Routine fÃ¼r die Serielle Ausgabe
+//Routine für die Serielle Ausgabe
 void uart_putchar (char c)
 //############################################################################
 {
@@ -677,7 +732,6 @@ void uart_putchar (char c)
 	//Ausgabe des Zeichens
 	UDR0 = c;
 }
-
 
 //############################################################################
 //INstallation der Seriellen Schnittstelle
@@ -706,9 +760,9 @@ void UART_Init (void)
 	VersionInfo.SWMinor = VERSION_MINOR;
 	VersionInfo.SWPatch = VERSION_PATCH;
 	VersionInfo.ProtoMajor  = VERSION_SERIAL_MAJOR;
-	VersionInfo.reserved1  = 0;
-	VersionInfo.reserved2  = 0;
+	VersionInfo.BL_Firmware  = 255;
     VersionInfo.HWMajor = PlatinenVersion;
+	VersionInfo.LabelTextCRC = CalculateDebugLableCrc();
 	pRxData = 0;
 	RxDataLen = 0;
 }
@@ -716,6 +770,7 @@ void UART_Init (void)
 //---------------------------------------------------------------------------------------------
 void DatenUebertragung(void)
 {
+	
 	if(!UebertragungAbgeschlossen) return;
 
  	if(CheckDelay(AboTimeOut))
@@ -749,14 +804,34 @@ void DatenUebertragung(void)
 	}
 	if(GetVersionAnforderung && UebertragungAbgeschlossen)
 	{
-		SendOutData('V', FC_ADDRESS, 1, (unsigned char *) &VersionInfo, sizeof(VersionInfo));
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+		if(GetVersionAnforderung == 2) // poll version of NC
+		{
+		 struct str_VersionInfo nc;
+		 nc.SWMajor = NC_Version.Major;
+		 nc.SWMinor = NC_Version.Minor;
+		 nc.SWPatch = NC_Version.Patch;
+		 nc.HWMajor = NC_Version.Hardware;
+		 nc.HardwareError[0] = 0xff;
+		 nc.HardwareError[1] = 0xff;
+		 nc.ProtoMajor = VersionInfo.ProtoMajor;
+		 nc.BL_Firmware = VersionInfo.BL_Firmware;
+		 nc.Flags = VersionInfo.Flags;
+//nc.reserved1 = 0;
+		 SendOutData('V', FC_ADDRESS, 1, (unsigned char *) &nc, sizeof(nc));
+		}
+		else 
+#endif
+		{
+		 SendOutData('V', FC_ADDRESS, 1, (unsigned char *) &VersionInfo, sizeof(VersionInfo));
+		} 
 		GetVersionAnforderung = 0;
 		Debug_OK("Version gesendet");
 	}
 
-	if(GetExternalControl && UebertragungAbgeschlossen) 	      // Bei Get werden die vom PC einstellbaren Werte vom PC zurÃ¼ckgelesen
+	if(GetExternalControl && UebertragungAbgeschlossen) 	      // Bei Get werden die vom PC einstellbaren Werte vom PC zurückgelesen
 	{
-		SendOutData('G',MeineSlaveAdresse, 1, (unsigned char *) &ExternControl, sizeof(ExternControl));
+		SendOutData('G',MeineSlaveAdresse, 1, (unsigned char *) &ExternalControl, sizeof(ExternalControl));
 		GetExternalControl = 0;
 	}
     if(((DebugDataIntervall>0 && CheckDelay(Debug_Timer)) || DebugDataAnforderung) && UebertragungAbgeschlossen)
@@ -768,23 +843,24 @@ void DatenUebertragung(void)
     	 }
     if(Intervall3D > 0 && CheckDelay(Timer3D) && UebertragungAbgeschlossen)
     	 {
-		  Data3D.Winkel[0] = (int) (IntegralNick / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
-		  Data3D.Winkel[1] = (int) (IntegralRoll / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
+		  Data3D.Winkel[0] = ToNaviCtrl.IntegralNick;//(int) (IntegralNick / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
+		  Data3D.Winkel[1] = ToNaviCtrl.IntegralRoll;//(int) (IntegralRoll / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
           Data3D.Winkel[2] = (int) ((10 * ErsatzKompass) / GIER_GRAD_FAKTOR);
 		  Data3D.Centroid[0] = SummeNick >> 9;
 		  Data3D.Centroid[1] = SummeRoll >> 9;
 		  Data3D.Centroid[2] = Mess_Integral_Gier >> 9;
+Data3D.AccZ = Aktuell_az;
     	  SendOutData('C', FC_ADDRESS, 1, (unsigned char *) &Data3D,sizeof(Data3D));
           Timer3D = SetDelay(Intervall3D);
     	 }
-    if(DebugTextAnforderung != 255) // Texte fÃ¼r die Analogdaten
+    if(DebugTextAnforderung != 255) // Texte für die Analogdaten
      {
 		unsigned char label[16]; // local sram buffer
 		memcpy_P(label, ANALOG_TEXT[DebugTextAnforderung], 16); // read lable from flash to sra
       SendOutData('A', FC_ADDRESS, 2, (unsigned char *)&DebugTextAnforderung, sizeof(DebugTextAnforderung),label, 16);
       DebugTextAnforderung = 255;
 	 }
-     if(ConfirmFrame && UebertragungAbgeschlossen)   // Datensatz bestÃ¤tigen
+     if(ConfirmFrame && UebertragungAbgeschlossen)   // Datensatz bestätigen
 	 {
 		SendOutData('B', FC_ADDRESS, 1, (uint8_t*)&ConfirmFrame, sizeof(ConfirmFrame));
       	ConfirmFrame = 0;
@@ -795,18 +871,43 @@ void DatenUebertragung(void)
 		 GetPPMChannelAnforderung = 0;
 	 }
 /*
+#ifndef REDUNDANT_FC_SLAVE
     if((CheckDelay(Kompass_Timer)) && UebertragungAbgeschlossen)
     	 {
-		  WinkelOut.Winkel[0] = (int) (IntegralNick / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
-		  WinkelOut.Winkel[1] = (int) (IntegralRoll / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
-		  WinkelOut.UserParameter[0] = Parameter_UserParam1;
-		  WinkelOut.UserParameter[1] = Parameter_UserParam2;
-    	  SendOutData('k', MK3MAG_ADDRESS, 1, (unsigned char *) &WinkelOut,sizeof(WinkelOut));
+    	  if(!NaviDataOkay)  // no external compass needed
+		   {
+		    WinkelOut.Winkel[0] = ToNaviCtrl.IntegralNick;//(int) (IntegralNick / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
+		    WinkelOut.Winkel[1] = ToNaviCtrl.IntegralRoll;//(int) (IntegralRoll / (EE_Parameter.GyroAccFaktor * 4));  // etwa in 0.1 Grad
+		    WinkelOut.UserParameter[0] = Parameter_UserParam1;
+		    WinkelOut.UserParameter[1] = Parameter_UserParam2;
+		    SendOutData('k', MK3MAG_ADDRESS, 1, (unsigned char *) &WinkelOut,sizeof(WinkelOut));
+		   }	
           if(WinkelOut.CalcState > 4)  WinkelOut.CalcState = 6; // wird dann in SPI auf Null gesetzt
-       	  if(!NaviDataOkay) Kompass_Timer = SetDelay(99);
+       	  if(JustMK3MagConnected) Kompass_Timer = SetDelay(99);
 		  else Kompass_Timer = SetDelay(999);
     	 }
+#endif
 */
+#ifdef REDUNDANT_FC_SLAVE
+  //if(UebertragungAbgeschlossen || MotorenEin)
+  if(UebertragungAbgeschlossen && (CheckDelay(Kompass_Timer) || MotorenEin))
+  {
+    static unsigned char who, request;
+    unsigned char SendRedundantMotor[MAX_MOTORS], i;
+    if(!request) { who = (who+1) % RequiredMotors; request = 1;} // nur in jedem 2. Zykus abfragen, weil die Antwort zu lang ist
+	else request = 0;
+    for(i=0; i<RequiredMotors; i++)
+     {
+	  if(request) SendRedundantMotor[0] = who+1;
+	  else SendRedundantMotor[0] = 0;
+	  if(PC_MotortestActive) SendRedundantMotor[0] |= 0x80;
+      SendRedundantMotor[i+1] = Motor[i].SetPoint;
+     } 
+	 Kompass_Timer = SetDelay(25);
+	 SendOutData('!', FC_ADDRESS, 1, (unsigned char *) &SendRedundantMotor, RequiredMotors+1);
+  }	
+#endif
+
 #ifdef DEBUG															// only include functions if DEBUG is defined
      if(SendDebugOutput && UebertragungAbgeschlossen)
      {

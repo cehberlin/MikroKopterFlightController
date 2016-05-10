@@ -166,7 +166,7 @@ void ProcessSBus(void)
 		    if(SenderOkay < 200) SenderOkay += 20; else SenderOkay = 200;
 		  } 
 		signal = sBusBuffer[1];
-        if(!load--) { process = (12*11 - 8); load = 2;} else process = (4*11 - 8);  // lowers the processor load 
+        if(!load--) { process = (16*11 - 8); load = 2;} else process = (4*11 - 8);  // lowers the processor load 
 		for(i = 0; i < process; i++)  // collect the single bits
 		{
 			if(sBusBuffer[sbyte] & bitmask8) signal |= bitmask11;
@@ -195,5 +195,5 @@ void ProcessSBus(void)
 	   }
  NewSBusData = 0;
 }
-
 #endif
+

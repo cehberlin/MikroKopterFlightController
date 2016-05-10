@@ -47,11 +47,11 @@ const char PROGMEM JETI_CODE[53] =
   0, // 34
   0, // 35
   0, // 36
-  0, // 37
+  0, //  SPEAK_20M		  	37   
 'D', //  SPEAK_MK_OFF	  	38
 'L', //  SPEAK_ALTITUDE_ON 	39
 'M', //  SPEAK_ALTITUDE_OFF 40
-  0, // 41
+  0, //  SPEAK_100M		 	41
   0, // 42
   0, // 43
   0, // 44
@@ -60,10 +60,11 @@ const char PROGMEM JETI_CODE[53] =
   0, //  SPEAK_SINKING    	47
   0, //  SPEAK_RISING      	48
   0, //  SPEAK_HOLDING     	49
-'K', //  SPEAK_GPS_ON      	50
+'K', //  SPEAK_GPS_ON      	50 // ?
   0, //  SPEAK_FOLLWING    	51
 'C' //  SPEAK_STARTING      52
 };
+
 
 JetiExPacket_t JetiExData[JETI_EX_PARAMETER_COUNT + 1] =    					// Parameter count + DeviceName (ID0) 
 { 
@@ -84,8 +85,8 @@ JetiExPacket_t JetiExData[JETI_EX_PARAMETER_COUNT + 1] =    					// Parameter co
 	{  	"Magn.field" ,	 "%  ", 		1, 			0 	, 		0       },    // ID 11
 	{  	"Vario     " ,	 "   ", 		1, 			0 	, 		0       },    // ID 12
 	{  	"ErrorCode " ,	 "   ", 		1, 			0 	, 		0       },    // ID 13
-	{  	"frei      " ,	 "   ", 		1, 			0 	, 		3       },    // ID 14 
-	{  	"frei      " ,	 "   ", 		1, 			0 	, 		3       },    // ID 15 
+	{  	"Latitude  " ,	 "   ", 		9, 			0 	, 		0       },    // ID 14  special data type for coordinates   Import: fixed position in list ID 14 - DO NOT MOVE !!!
+	{  	"Longitude " ,	 "   ", 		9, 			0 	, 		0       },    // ID 15  special data type for coordinates   Import: fixed position in list ID 15 - DO NOT MOVE !!!
 };
 
 
@@ -122,7 +123,7 @@ void BuildJeti_Vario(void)
 void JetiEX_Update(void)
 {
 
-    GetHottestBl();    
+	GetHottestBl();    
  
 	JetiExData[1].Value  =  UBat;
 	JetiExData[2].Value  =  Capacity.ActualCurrent;
@@ -133,9 +134,12 @@ void JetiEX_Update(void)
 	JetiExData[7].Value  =  GPSInfo.Speed;
 	JetiExData[8].Value  =  GPSInfo.HomeDistance / 10;
 	JetiExData[9].Value  =  GPSInfo.HomeBearing;
-	JetiExData[10].Value  = MaxBlTempertaure;
+	JetiExData[10].Value  = MaxBlTemperture;
 	JetiExData[11].Value  = EarthMagneticField;
-//	JetiExData[12].Value  = Vario;
+//	JetiExData[12].Value  = Vario; // wird in BuildJeti_Vario() gemacht 
 	JetiExData[13].Value  = NC_ErrorCode;
+//JetiExData[14].Value =  53 * 0x10000 + 23467; // GPS-Latitude  (macht NC_Fills_HoTT_Telemety() )
+//JetiExData[15].Value =   7 * 0x10000 + 23467; // GPS-Longitude (macht NC_Fills_HoTT_Telemety() )
+	
 }
 #endif

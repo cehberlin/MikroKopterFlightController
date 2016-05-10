@@ -53,7 +53,7 @@
 
 #include "main.h"
 #include "eeprom.h"
-volatile int  Aktuell_Nick,Aktuell_Roll,Aktuell_Gier,Aktuell_ax, Aktuell_ay,Aktuell_az, UBat = 100;
+volatile int  Aktuell_Nick,Aktuell_Roll,Aktuell_Gier,Aktuell_ax, Aktuell_ay,Aktuell_az, UBat = 150;
 volatile int  AdWertNickFilter = 0, AdWertRollFilter = 0, AdWertGierFilter = 0;
 volatile int  HiResNick = 2500, HiResRoll = 2500;
 volatile int  AdWertNick = 0, AdWertRoll = 0, AdWertGier = 0;
@@ -68,7 +68,16 @@ volatile int VarioMeter = 0;
 volatile unsigned int ZaehlMessungen = 0;
 unsigned char AnalogOffsetNick = 115,AnalogOffsetRoll = 115,AnalogOffsetGier = 115;
 volatile unsigned char AdReady = 1;
-volatile long HoehenWertF = 0;
+unsigned int BaroStep = 500;
+long ExpandBaroStep = 0;
+long HoehenWertF = 0;
+long HoehenWert_Mess = 0;
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+long HoehenWertF_Mess = 0; 
+unsigned char CalAthmospheare = 16;
+unsigned char AD_ACC_Y = 6;
+unsigned char AD_ACC_X = 7;
+#endif
 
 //#######################################################################################
 void ADC_Init(void)
@@ -80,60 +89,52 @@ void ADC_Init(void)
 
 #define DESIRED_H_ADC 800
 
+void CalcExpandBaroStep(void)
+{
+  if(ACC_AltitudeControl) ExpandBaroStep = BaroStep * (long)ExpandBaro;
+  else ExpandBaroStep = (16 * BaroStep) * (long)ExpandBaro - 4;
+}
+
 void SucheLuftruckOffset(void)
 {
  unsigned int off;
  ExpandBaro = 0;
-
-#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
- {
-  unsigned char off2;
-  OCR0A = 150;
-  off2 = GetParamByte(PID_PRESSURE_OFFSET);
-  if(off2 < 230) off2 += 10;
-  OCR0B = off2;
-  Delay_ms_Mess(100);
-  if(MessLuftdruck > DESIRED_H_ADC) off2 = 240;
-  for(; off2 >= 5; off2 -= 5)
-   {
-   OCR0B = off2;
-   Delay_ms_Mess(50);
-   printf("*");
-   if(MessLuftdruck > DESIRED_H_ADC) break;
-   }
-   SetParamByte(PID_PRESSURE_OFFSET, off2);
-  if(off2 >= 15) off = 140; else off = 0;
-  for(; off < 250;off++)
-   {
-   OCR0A = off;
-   Delay_ms_Mess(50);
-   printf(".");
-   if(MessLuftdruck < DESIRED_H_ADC) break;
-   }
-   DruckOffsetSetting = off;
- }
-#else
+ CalcExpandBaroStep();
   off = GetParamByte(PID_PRESSURE_OFFSET);
-  if(off > 20) off -= 10;
+  if(off < 240) off += 10;
   OCR0A = off;
-  Delay_ms_Mess(100);
-  if(MessLuftdruck < DESIRED_H_ADC) off = 0;
-  for(; off < 250;off++)
+  OCR0B = 255-off;
+  Delay_ms_Mess(150);
+  if(MessLuftdruck > DESIRED_H_ADC) off = 240;
+  for(; off > 5; off--)
    {
-   OCR0A = off;
-   Delay_ms_Mess(50);
-   printf(".");
-   if(MessLuftdruck < DESIRED_H_ADC) break;
+    OCR0A = off;
+    OCR0B = 255-off;
+    Delay_ms_Mess(100);
+    printf(".");
+    if(MessLuftdruck > DESIRED_H_ADC) break;
    }
    DruckOffsetSetting = off;
    SetParamByte(PID_PRESSURE_OFFSET, off);
+ if((EE_Parameter.GlobalConfig & CFG_HOEHENREGELUNG) && (DruckOffsetSetting < 10 || DruckOffsetSetting >= 230)) VersionInfo.HardwareError[0] |= FC_ERROR0_PRESSURE;
+
+#if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// + correction of the altitude error in higher altitudes
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ CalAthmospheare = 15;                                      // re-claibrated from 16 to 15 at 2.09 -> the baro-Altimeter was about 7% too high
+ if(ACC_AltitudeControl)
+  {
+   if(PlatinenVersion < 23) { if(off < 140) CalAthmospheare += (160 - off) / 26; }
+//   else { if(off < 170) CalAthmospheare += (188 - off) / 19; }
+   else { if(off < 170) CalAthmospheare += (188 - off) / 15; } // rescaled at 2.09
+  }
+ Luftdruck = MessLuftdruck * CalAthmospheare;
 #endif
- if((EE_Parameter.GlobalConfig & CFG_HOEHENREGELUNG) && (DruckOffsetSetting < 10 || DruckOffsetSetting >= 245)) VersionInfo.HardwareError[0] |= FC_ERROR0_PRESSURE;
- OCR0A = off;
  Delay_ms_Mess(300);
 }
 
-
+/*
 void SucheGyroOffset(void)
 {
  unsigned char i, ready = 0;
@@ -158,7 +159,7 @@ void SucheGyroOffset(void)
   }
    Delay_ms_Mess(70);
 }
-
+*/
 /*
 0  n
 1  r
@@ -229,7 +230,12 @@ ISR(ADC_vect)
             if(EE_Parameter.ExtraConfig & CFG_3_3V_REFERENCE) UBat = (3 * UBat + (11 * ADC) / 30) / 4; // there were some single FC2.1 with 3.3V reference
 			else   
 #endif
-			UBat = (3 * UBat + ADC / 3) / 4;
+			 {
+			  static unsigned int tmpVoltage = 0;
+			  if(!tmpVoltage) tmpVoltage = (10 * ADC);
+			  if(tmpVoltage <= (10 * ADC)) tmpVoltage += 2; else tmpVoltage -= 2;
+              UBat = tmpVoltage / 31;
+			 } 
 		    kanal = AD_ACC_Z;
             break;
        case 8:
@@ -293,10 +299,12 @@ ISR(ADC_vect)
 		    kanal = AD_GIER;
             break;
         case 12:
-            if(PlatinenVersion == 10)  AdWertGier = (ADC + gier1 + 1) / 2;
+/*            if(PlatinenVersion == 10)  AdWertGier = (ADC + gier1 + 1) / 2;
             else
             if(PlatinenVersion >= 20)  AdWertGier = 2047 - (ADC + gier1);
 			else 					   AdWertGier = (ADC + gier1);
+*/
+			AdWertGier = 2047 - (ADC + gier1);
             kanal = AD_ACC_Y;
             break;
         case 13:
@@ -311,7 +319,8 @@ ISR(ADC_vect)
             break;
         case 15:
             nick1 += ADC;
-            if(PlatinenVersion == 10) nick1 *= 2; else nick1 *= 4;
+            //if(PlatinenVersion == 10) nick1 *= 2; else 
+			nick1 *= 4;
             AdWertNick = nick1 / 8;
             nick_filter = (nick_filter + nick1) / 2;
             HiResNick = nick_filter - AdNeutralNick;
@@ -320,7 +329,8 @@ ISR(ADC_vect)
             break;
         case 16:
             roll1 += ADC;
-            if(PlatinenVersion == 10) roll1 *= 2; else roll1 *= 4;
+            //if(PlatinenVersion == 10) roll1 *= 2; else 
+			roll1 *= 4;
             AdWertRoll = roll1 / 8;
             roll_filter = (roll_filter + roll1) / 2;
             HiResRoll = roll_filter - AdNeutralRoll;
@@ -331,13 +341,10 @@ ISR(ADC_vect)
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 			if(ACC_AltitudeControl)			
 			{
-			 HoehenWertF = (ACC_AltitudeFusion(0) + SA_FILTER/2)/SA_FILTER;	// cm
+			 HoehenWertF_Mess = (ACC_AltitudeFusion(0) + SA_FILTER/2)/SA_FILTER;	// cm
             }
-			else HoehenWertF = HoehenWert;
-#else 
-			HoehenWertF = HoehenWert;
+			else HoehenWertF_Mess = HoehenWert;
 #endif
-			
             state = 0;
 			AdReady = 1;
             ZaehlMessungen++;
@@ -347,10 +354,17 @@ ISR(ADC_vect)
 #if (defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__))
 			if(ACC_AltitudeControl)			
 			{
-				tmpLuftdruck = MessLuftdruck - 523 * (long)ExpandBaro;  // -523 counts per offset step
-				Luftdruck -= Luftdruck/16;
-				Luftdruck += tmpLuftdruck;
-				HoehenWert = StartLuftdruck - Luftdruck;	// cm
+				tmpLuftdruck = MessLuftdruck - ExpandBaroStep;  // -523 counts per offset step
+				if(BaroExpandActive)
+				{
+				  if(BaroExpandActive < 10) Luftdruck = tmpLuftdruck * CalAthmospheare;
+				}
+				else
+				{
+					Luftdruck -= Luftdruck / CalAthmospheare; // 16
+					Luftdruck += tmpLuftdruck;
+					HoehenWert_Mess = StartLuftdruck - Luftdruck;	// cm
+				}			
 			}
 			else 
 #endif
@@ -359,11 +373,11 @@ ISR(ADC_vect)
 				if(++messanzahl_Druck >= 16) // war bis 0.86 "18"
 				{
 			    signed int tmp;
-				Luftdruck = (7 * Luftdruck + tmpLuftdruck - (16 * 523) * (long)ExpandBaro + 4) / 8;  // -523.19 counts per 10 counts offset step
-				HoehenWert = StartLuftdruck - Luftdruck;
+				Luftdruck = (7 * Luftdruck + tmpLuftdruck - ExpandBaroStep) / 8;  // -523.19 counts per 10 counts offset step
+				HoehenWert_Mess = StartLuftdruck - Luftdruck;
 				SummenHoehe -= SummenHoehe/SM_FILTER;
-				SummenHoehe += HoehenWert;
-				tmp = (HoehenWert - SummenHoehe/SM_FILTER);
+				SummenHoehe += HoehenWert_Mess;
+				tmp = (HoehenWert_Mess - SummenHoehe/SM_FILTER);
 				if(tmp > 1024) tmp = 1024; 	else if(tmp < -1024) tmp = -1024; 
                 if(abs(VarioMeter) > 700) VarioMeter = (15 * VarioMeter + 8 * tmp)/16;
 				else VarioMeter = (31 * VarioMeter + 8 * tmp)/32;

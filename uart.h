@@ -45,10 +45,13 @@ struct str_Data3D
 {
    signed int  Winkel[3]; // nick, roll, compass in 0,1°
    signed char Centroid[3];
-   signed char reserve[5];
+//   signed char reserve[5];
+unsigned int AccZ;
+signed char reserve[3];
 };
 extern struct str_Data3D Data3D;
 
+/*
 struct str_ExternControl
 {
  unsigned char Digital[2];
@@ -63,6 +66,25 @@ struct str_ExternControl
  unsigned char Config;
 };
 extern struct str_ExternControl   ExternControl;
+*/
+
+// defines for ExternalControl.Config
+#define EC_VALID   		0x01  // only valid if this is 1
+#define EC_GAS_ADD 		0x02  // if 1 -> use the GAS Value not as MAX
+#define EC_IGNORE_RC 	0x80  // if 1 -> for Flying without RC-Control 
+
+struct str_ExternControl
+{
+ signed char   Nick;
+ signed char   Roll;
+ signed char   Gier;
+ signed char   Gas;
+ unsigned char Frame;   // will return a confirm frame with this value
+ unsigned char Config;
+ unsigned char free;
+};
+extern struct str_ExternControl ExternalControl;
+extern unsigned char ExternalControlTimeout;
 
 // FC hardware errors
 
@@ -97,11 +119,11 @@ struct str_VersionInfo
   unsigned char SWMajor;
   unsigned char SWMinor;
   unsigned char ProtoMajor;
-  unsigned char reserved1;
+  unsigned char LabelTextCRC;
   unsigned char SWPatch;
   unsigned char HardwareError[2];
   unsigned char HWMajor;
-  unsigned char reserved2;  
+  unsigned char BL_Firmware;  
   unsigned char Flags;
 };
 

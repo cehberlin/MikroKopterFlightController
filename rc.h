@@ -22,6 +22,7 @@ extern volatile int PPM_diff[MAX_RC_IN];  // das diffenzierte Stick-Signal
 extern volatile unsigned char NewPpmData;
 extern volatile char Channels,tmpChannels;
 extern unsigned int PPM_Neutral;
+extern signed int ChannelNick,ChannelRoll,ChannelGas,ChannelYaw;
 
 //  0 		-> frei bzw. ACT rssi
 //  1 - 16 	-> 1-16

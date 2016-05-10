@@ -590,6 +590,7 @@ V0.70d H.Buss 02.08.2008
   - disable Altitude hold in case of ACC-Z error
   
  2.00a (after public Beta test 0.91)
+  - show SW-Version in Hot Display
   - GPS-Parameter changed (P = 90->100; I = 90->90; D = 90->120; A = 40)
   - Move NICK/Roll Sticks for switching on / off
   - Move the Stick > 100 instead > 75 for switch on / off
@@ -613,4 +614,205 @@ V0.70d H.Buss 02.08.2008
 // 30 Fix -> -127 
 // 31 Fix -> 0
 // 32 Fix -> 128
+  
+ 2.00b
+ - default Camera-Position after calibration changed if Inverted
+ - some changes in ACC-Altitude hold to reduce climbing in fast foreward fly
+ - UserParameter1 > 100 disables camera nick control (for BL-Gimbals with self-alignments)
+ - Beep at motor off (1sek)
+
+ 2.00d 
+ - Do not start if MK is moving
+ - Full Range of altitude measure expansion (3000m flight instead of 950m)
+ - compensation of the atmospheric altitude error
+ - Measure the exact influence of the barometric range extender
+ - Reduce Nick/Roll if Gas is Zero -> avoids MK to turn over during switch-off sequence
+ - Tell NC to wait at the Waypoint until Out1 Pattern is over
+ - virtual menu: single BL-Currents (FC2.1)
+ - per default active: NO_GPSFIX_NO_START and CFG_NO_RCOFF_BEEPING
+ - Servo-Nick-Refres reduced from 4 to 3 in default setting -> makes the camera servos faster
+ - No undervoltage Beeping if the FC is only supplied by MKUSB (the Voltage measurement is zero)
+  - Reset I2C-Error counter when calibrating the Sensors
+ - HOTT & Jeti bugfix: The temperatures were sometimes wrong
+ - HoTT: 
+   - GPS coordiante now in Degree + Minutes.Decimalminutes (like in original Graupner-Receivers)
+   - added the MK Status in Transmitter Logfile -> General->Fuel
+   - added the MK Speach in Transmitter Logfile -> General->Alt3Sek
+   
+2.02a
+ - code too big for MEGA644 -> only ATMEGA1284 supported
+ - Jeti:GPS-Koordinate
+ - Don't accept Reset-Command if Motor running
+ - 'Idle' Bit in Output-Mask
+ - Option: DisableServoNick
+ - Bugfix Maximum Altitude -> New: SpeakHoTT Errormessage = "MaximumAltitude" and VarioCharacter goes to '='
+ - New Error code 32 "ERR:BL Selftest"
+ - prepared for current measurements up to 75A per ESC
+ - reduced speed of capacity-calculation() from 10ms to 50ms - that should be fast enough
+ - Timing correction for NC-Data (41Hz)
+ - Autolanding if undervoltage
+ - Compass offset angle 
+ - 0.2V hysteresis in undervoltage warning
+ - Fixed: Bug in LED-Output
+ - Autolanding per default at 3,1V 
+
+2.02b
+ - Bugfix: Data reading for Dodecas (12 motors)
+ 
+2.04a (12.03.2014 after public betatest 2.03)
+ - No support for FC 1.x
+ - Bugfix: set ChannelYaw to zero in case of RC lost
+ - Bugfix: Max 6 cells in lipo-detection instead of 7
+ - Bugfix: Compass-Calibration: At the second comdass calibration, the Calibration started in step 2 and not in step 1
+ - increase the allowed band for Auto-Middele-Point of the AltitudeStick to 70-175
+ - Dodeca: reduced I2C Packet lenght to 8
+ - Auto-ComingHome at Undervoltage
+ - Voltage measurement was 3% too high
+ - allowed band for ACC-Z increased to: 652 - 717
+ - send 'K' command only if JustMK3MagConnected
+ - Redundant operation supported
+ - Loading Waypoints from SD-Card: 
+	- menu by HoTT and Jeti added
+	- Show the name of the WP-List 
+	- do not load points if no stafix
+ - Version for FC 2.0 with ATMEGA644
+	Not Supported in FC 2.0:
+		- ACC-Upgrade for better ACC-Altitude control
+		- Hott
+		- Jeti-EX
+		- Auto-Start & Landing
+		- WP-List Name
+
+2.04b
+ - Bugfix: Poti Values were wrong after calibration
+ - Redundant Slave: LED-Binking: Green: UART Data  &  Red:I2C error
+ - CompassCorrected (True-Compass) in HoTT- and Jeti-Display 
+ - "True Compass" in virtual menu
+ - Jeti: Indicator "R" for redundancy
+ 
+2.04c
+ - S.Bus extended to 16 Channels
+
+2.06a (09.04.2013 after public beta 2.05) 
+ - Load/Store Single Point
+ - Photo-Releases on Altitudes
+ - Voltage warning set to 3,2V, because the Voltage measurement was lower than before
+ - new Parameter: SinglePoint Speed
+ - Counter for Motor-Restarts for each single motor
+ - Servo-Signals can be configured if mapped to output
+ - Speak "Error_Motor" as soon as one Motor reports a restart
+ - EE_Parameter.NaviDescendRange now as Parameter in EEPROM
+ - EE_Parameter.NaviMaxFlyingRange now as Parameter in EEPROM
+ - Maximum Altitude is also used in the NC instead of "ABSOLUTE_FLYING_ALTITUDE" from SD-Card
+ 
+2.06b (05.05.2014)
+ - Change for redundant slave: Now the Status of all 8 BLs can be read
+ 
+2.06c (10.05.2014)
+ - send EE_Parameter.CamOrientation to NC
+ - Bugfix: if the CamOrientation was not zero, the direction in load/store Singelpoints were not correct
+ 
+2.06d (16.06.2014)
+ - Starting with activated Altitudecontrol: Keep setpoint -2m until Gas-Stick rises up
+ - Bugfix: Redundant slave: wait at start until BLc are configured
+
+2.06e (24.06.2014)
+ - Bugfix: BL-Config of motors 9-12 was deactivated
+ - reading the SW-Version of the BLs
+ - Bugfix: Motor 1 sometimes reported "software not compatible" in BL-Settings
+ - Transmit all version numbers to KopterTool
+ 
+2.06f (21.7.2014)
+ - Secure function: Avoid that the Altitude setpoint can be much higher than the actual altitude
+ - Use MinGas setting before while "Waiting for takeoff" instead of "AltitudeMinGas".
+
+2.06g 
+ - don't start motors when NC is in simulation mode 
+ - correct behaviour if CompassEffect is zero
+ 
+2.08a (10.10.2014)
+ - Redundance now In Flag3
+ - Boat-Mode implemented
+ - New Gyro DriftCompensation implemented
+ - sending Offset values to NC for Logging
+ - Menu: Neutral Values of Gyro now in full resolution
+ - camera releases via automatic distances faster than 1 sec
+ - clamp Altitude setpoint at +15m instead of +10m to allow faster starting
+ - set all channels to zero in case of RC-Lost
+ - removed: GPS_Z
+ - New Parameter: Parameter_Hoehe_TiltCompensation
+ - Default Failsafe-Time is 60sec (was 30sek before)
+ - Sensitive_RC removed
+ - Bugfix: WP-Event was sometimes triggered two times 
+ - transmit HoverGas to NC for logging
+
+2.08b (09.02.2015)
+ - reduced load on UART for redundant slave when motors are not running
+ 
+2.10a (10.11.2014 - 17.04.2015)
+ - New data structure of ExternalControl
+ - Internal Copies of the Channel values
+ - NC-Yawing rate limited to 100°/sec
+ - ExpandBaro faster -> 80ms instead of 700ms
+ - Altitude measurement re-calibrated (the measured value was about 5% too high)
+ - transmit receiver type to NC 
+ - transmit stored neutral values (BOAT) to NC
+ - SPI communication optimized -> some Data are faster, some are slower 
+ - BL-State (Current, Temperature,...) are now faster transferred for Logging
+ - ComingHome: automatic Direction change 
+ - allows Yawing without CareFree (Yawing at Coming Home)
+ - Bugfix: Output LED Blinking when RC-Lost
+ - bugfix: uBat in 16Bit
+ - AnalogLable CRC implemented -> KopterTool doesn't need to read them every time
+ - ShutterCounter -> counts up when the output switches from low to high
+ - transmit LipoCount to NC
+ - Config "Disable CameraCompensation" disables also Roll-Compensation now
+ - AccZ in 3D-Datastructure (for Ben)
+ - new Parameter: LandingAccZ 
+ - 16 Motors
+ - in-flight HoTT: Motortest and ACC-Calibration
+ - Error Message: No Redundancy
+ - Error Message: Redundancy Test
+ - Redundant Slave: copy the Current, State and Temperature from the UART Data
+ - in-flight ACC-Calibration with Jeti and KopterTool
+ - ACC-Calibration by stick: 5 seconds delay
+ - Bugfix: LED pattern was not used more often if the Hold time was longer than the pattern time
+ - Servo Failsafe Positions implemented 
+	-> That Position is used for RC-Lost and UnderVoltage-Autolanding
+	-> minimum 10 seconds active
+ - MULTIPLEX servo protocol implemented (12 & 16 Channels)
+
+2.10b (28.04.2014)
+ - small changes for the case of "NC-Communication loss"
+ 
+2.10c (11.05.2015)
+ - Redundancy Master: If the I2C-Bus was switched off before flight (motors idle runnung), the Master didn't go into 'Fly'-State 
+ - Auto-Safe by transmitter-switch: UserParameter5 can be used in Menu "Save single position"
+ - Auto-Load by transmitter-switch: UserParameter5 in Menu "Load single position"
+
+2.10e (13.07.2015)
+ - ERR38: "GPS Update Rate" if Update Rate is lower than 5Hz
+ - Parameter.FailSafeTime now in Logfile
+ - Continous SPI-Transmission during calibration -> avoids different error-messages like "No FC Communication" etc.
+ - Axisdecoupling can't be deactivated
+
+2.12a (12.10.2015)
+ - SingleWpControlChannel -> 3-stage switch for store/call single point
+ - MenuKeyChannel -> Key for Jeti/HoTT-Menu: Single points 
+ - REDUNDANT Slave doesn't report 'CareFree-Error'
+ - Load Points via Switch on transmitter without using a menu
+ - AxisDecoupling can't be deactivated
+ - ExternalControlTimeout activated (2 seconds)
+
+
+  
+toDo:
+- CalAthmospheare nachführen 
+
+
+ 
+ 
+ 
+ 
+
   

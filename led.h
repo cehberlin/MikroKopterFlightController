@@ -9,3 +9,6 @@
 
 extern void LED_Init(void);
 extern void LED_Update(void);
+extern unsigned char NC_Wait_for_LED;
+extern unsigned int ShutterCounter;
+extern unsigned char Out1ChangedFlag; // can be 0 or 0x80

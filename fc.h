@@ -4,11 +4,13 @@ Flight Control
 
 #ifndef _FC_H
 #define _FC_H
-//#define GIER_GRAD_FAKTOR 1291L // Abh√§ngigkeit zwischen GyroIntegral und Winkel
+//#define GIER_GRAD_FAKTOR 1291L // Abh‰ngigkeit zwischen GyroIntegral und Winkel
 //#define GIER_GRAD_FAKTOR 1160L
-extern long GIER_GRAD_FAKTOR; // Abh√§ngigkeit zwischen GyroIntegral und Winkel
+extern long GIER_GRAD_FAKTOR; // Abh‰ngigkeit zwischen GyroIntegral und Winkel
 #define STICK_GAIN 4
 #define ACC_AMPLIFY    6
+#define HEIGHT_CONTROL_STICKTHRESHOLD 15
+#define SERVO_FS_TIME 10   // in Seconds
 
 // FC_StatusFlags
 #define FC_STATUS_MOTOR_RUN  				0x01
@@ -30,15 +32,25 @@ extern long GIER_GRAD_FAKTOR; // Abh√§ngigkeit zwischen GyroIntegral und Winkel
 #define FC_STATUS2_AUTO_STARTING       		0x40
 #define FC_STATUS2_AUTO_LANDING       		0x80
 
+// FC_StatusFlags3 
+#define FC_STATUS3_REDUNDANCE_AKTIVE        0x01
+#define FC_STATUS3_BOAT		                0x02
+#define FC_STATUS3_REDUNDANCE_ERROR         0x04
+#define FC_STATUS3_REDUNDANCE_TEST			0x08
+
 //NC_To_FC_Flags
 #define NC_TO_FC_FLYING_RANGE      	0x01
-#define NC_TO_FC_EMERGENCY_LANDING 	0x02
+#define NC_TO_FC_EMERGENCY_LANDING 	0x02 // Forces a landing
 #define NC_TO_FC_AUTOSTART 			0x04
-#define NC_TO_FC_AUTOLANDING		0x08 // not used 
+#define NC_TO_FC_FAILSAFE_LANDING	0x08 // moves Servos into FS-Position
+#define NC_TO_FC_SIMULATION_ACTIVE	0x10 // don't start motors
 
 extern volatile unsigned char FC_StatusFlags, FC_StatusFlags2;
+extern unsigned char FC_StatusFlags3;
 extern void ParameterZuordnung(void);
 extern unsigned char GetChannelValue(unsigned char ch); // gives the unsigned value of the channel
+extern void ChannelAssingment(void);
+extern void StoreNeutralToEeprom(void);
 
 #define Poti1 Poti[0]
 #define Poti2 Poti[1]
@@ -60,27 +72,27 @@ extern unsigned char GetChannelValue(unsigned char ch); // gives the unsigned va
 
 extern unsigned char Sekunde,Minute;
 extern unsigned int BaroExpandActive;
-extern long IntegralNick,IntegralNick2;
-extern long IntegralRoll,IntegralRoll2;
+extern long IntegralNick;//,IntegralNick2;
+extern long IntegralRoll;//,IntegralRoll2;
 //extern int IntegralNick,IntegralNick2;
 //extern int IntegralRoll,IntegralRoll2;
 extern unsigned char Poti[9];
 
-extern long Mess_IntegralNick,Mess_IntegralNick2;
-extern long Mess_IntegralRoll,Mess_IntegralRoll2;
+extern long Mess_IntegralNick;//,Mess_IntegralNick2;
+extern long Mess_IntegralRoll;//,Mess_IntegralRoll2;
 extern long IntegralAccNick,IntegralAccRoll;
 extern long SummeNick,SummeRoll;
 extern volatile long Mess_Integral_Hoch;
 extern long Integral_Gier,Mess_Integral_Gier,Mess_Integral_Gier2;
 extern int  KompassValue;
-extern int  KompassSollWert;
+extern int  KompassSollWert,NC_CompassSetpoint;
 extern int  KompassRichtung;
 extern char CalculateCompassTimer;
 extern unsigned char KompassFusion;
 extern unsigned char ControlHeading;
 extern int  TrimNick, TrimRoll;
 extern long  ErsatzKompass;
-extern int   ErsatzKompassInGrad; // Kompasswert in Grad
+extern int   ErsatzKompassInGrad,CompassCorrected; // Kompasswert in Grad
 extern long HoehenWert;
 extern long SollHoehe;
 extern long FromNC_AltitudeSetpoint;
@@ -89,12 +101,12 @@ extern unsigned char Parameter_HoehenSchalter;      // Wert : 0-250
 extern unsigned char CareFree;
 extern int MesswertNick,MesswertRoll,MesswertGier;
 extern int AdNeutralNick,AdNeutralRoll,AdNeutralGier, Mittelwert_AccNick, Mittelwert_AccRoll;
+extern int BoatNeutralNick,BoatNeutralRoll,BoatNeutralGier;
 extern unsigned int NeutralAccX, NeutralAccY;
 extern unsigned char HoehenReglerAktiv;
 extern int NeutralAccZ;
 extern signed char NeutralAccZfine;
 extern long Umschlag180Nick, Umschlag180Roll;
-extern signed int ExternStickNick,ExternStickRoll,ExternStickGier;
 extern unsigned char Parameter_UserParam1,Parameter_UserParam2,Parameter_UserParam3,Parameter_UserParam4,Parameter_UserParam5,Parameter_UserParam6,Parameter_UserParam7,Parameter_UserParam8;
 extern int NaviAccNick,NaviAccRoll,NaviCntAcc;
 extern unsigned int modell_fliegt;
@@ -104,7 +116,6 @@ extern void SendMotorData(void);
 //void Mittelwert(void);
 extern unsigned char SetNeutral(unsigned char AccAdjustment);  // retuns: "sucess"
 extern void Piep(unsigned char Anzahl, unsigned int dauer);
-extern unsigned char isExternalControlEnabled(void);
 extern void CopyDebugValues(void);
 extern unsigned char ACC_AltitudeControl;
 extern signed int CosAttitude;	// for projection of hoover gas
@@ -147,11 +158,11 @@ extern unsigned char Parameter_GlobalConfig;
 extern unsigned char Parameter_ExtraConfig;
 extern signed char MixerTable[MAX_MOTORS][4];
 extern const signed char sintab[31];
-
-extern unsigned char armMotors(void);
-extern void unarmMotors(void);
-extern void preFlightCalibration(void);
-extern void persistedCalibration(void);
+extern unsigned char LowVoltageLandingActive;
+extern unsigned char LowVoltageHomeActive;
+extern unsigned char Parameter_MaximumAltitude;
+extern char NeueKompassRichtungMerken;
+extern unsigned char ServoFailsafeActive;
 
 #endif //_FC_H
 

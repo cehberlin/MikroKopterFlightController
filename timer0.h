@@ -18,7 +18,7 @@ extern volatile unsigned char UpdateMotor;
 extern volatile unsigned int beeptime;
 extern volatile unsigned int cntKompass;
 extern unsigned int BeepMuster;
-extern volatile unsigned char SendSPI, ServoActive, CalculateServoSignals;
+extern volatile unsigned char BytegapSPI, ServoActive, CalculateServoSignals;
 extern volatile int16_t	ServoNickValue;
 extern volatile int16_t	ServoRollValue;
 extern signed int NickServoValue;

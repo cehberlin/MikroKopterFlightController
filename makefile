@@ -5,12 +5,12 @@ MCU = atmega1284p
 F_CPU = 20000000
 #-------------------------------------------------------------------
 VERSION_MAJOR    =   2
-VERSION_MINOR    =  00
+VERSION_MINOR    =  12
 VERSION_PATCH    =  0
-VERSION_SERIAL_MAJOR = 11  	# Serial Protocol
+VERSION_SERIAL_MAJOR = 11  	# Serial Protocol to KopterTool -> do not change!
 VERSION_SERIAL_MINOR = 0  	# Serial Protocol
-NC_SPI_COMPATIBLE = 55		# Navi-Kompatibilität
-LIB_FC_COMPATIBLE = 3       # Library
+NC_SPI_COMPATIBLE = 76		# Navi-Kompatibilität
+LIB_FC_COMPATIBLE = 7       # Library
 #-------------------------------------------------------------------
 # ATMEGA644: 63487 is maximum
 #-------------------------------------------------------------------
@@ -145,9 +145,9 @@ OPT = s
 ##########################################################################################################
 # List C source files here. (C dependencies are automatically generated.)
 SRC = main.c uart.c timer0.c analog.c menu.c eeprom.c
-SRC += twimaster.c rc.c fc.c GPS.c spi.c led.c spektrum.c
+SRC += twimaster.c rc.c fc.c GPS.c spi.c led.c Spektrum.c
 SRC += mymath.c jetimenu.c capacity.c debug.c
-SRC += hottmenu.c sbus.c user_receiver.c
+SRC += hottmenu.c sbus.c user_receiver.c M-Link.c
 SRC += jeti_ex.c
 ##########################################################################################################
 
@@ -338,7 +338,6 @@ all: begin gccversion sizebefore $(TARGET).elf $(TARGET).hex sizeafter finished 
 begin:
 	@echo
 	@echo $(MSG_BEGIN)
-	@echo Building $(TARGET)
 
 finished:
 	@echo $(MSG_ERRORS_NONE)
@@ -417,9 +416,9 @@ program: $(TARGET).hex $(TARGET).eep
 
 
 # Link: create ELF output file from object files.
-#.SECONDARY : $(TARGET).elf
-#.PRECIOUS : $(OBJ)
-$(TARGET).elf : $(OBJ)
+.SECONDARY : $(TARGET).elf
+.PRECIOUS : $(OBJ)
+%.elf: $(OBJ)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $(OBJ) --output $@ $(LDFLAGS)
@@ -443,6 +442,11 @@ $(TARGET).elf : $(OBJ)
 	@echo $(MSG_ASSEMBLING) $<
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
+
+
+
+
+
 # Target: clean project.
 clean: begin clean_list finished end
 
@@ -465,6 +469,7 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.s)
 	$(REMOVE) $(SRC:.c=.d)
 	$(REMOVE) $(SRC:.c=.o)
+
 
 # Automatically generate C source code dependencies. 
 # (Code originally taken from the GNU make user manual and modified 
