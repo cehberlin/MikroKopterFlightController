@@ -3,7 +3,7 @@ Special Version of the MikroKopter Firmware for simplified and improved control 
 
 Two branches: 
 
-One based on Version V2.00a and one based on Version V2.12a. Version V2.12a is also compatiple with more recent hardware revisions.
+One based on Version V2.00a and one based on Version V2.12a. Version V2.12a is also compatible with more recent hardware revisions.
 
 Version V2.00a was choosen because (at this time) most updated version V2.08a was not working properly on our system.
 Original Source: http://svn.mikrokopter.de/websvn/listing.php?repname=FlightCtrl&path=%2Ftags%2FV2.00a_NOT_for_FC_V2.5%2F&#a4f0e706c6bd462259eead4c87f23de7a
